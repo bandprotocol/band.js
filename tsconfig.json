@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "declaration": true,
+      "esModuleInterop": true,
+      "module": "commonjs",
+      "outDir": "./dist",
+      "rootDirs": ["./src"],
+      "strict": true,
+      "target": "es2017",
+      "noUnusedLocals": true,
+      "noUnusedParameters": true
+    },
+    "include": ["./src/**/*"]
+  }
+  
