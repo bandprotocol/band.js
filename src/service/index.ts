@@ -20,21 +20,19 @@ export default class BandProtocolClient {
 
     async getNetwork(): Promise<string>{
         const web3 = new Web3(this.provider)
-        const networkName = await web3.eth.net.getId().then(value => {
-            switch (value) {
-                case 1:
-                    return 'Mainnet'
-                case 3:
-                    return 'Ropsten'
-                case 4:
-                    return 'Rinkeby'
-                case 42:
-                    return 'Kovan' 
-                default:
-                    return 'Unknown'
-            }
-        });
-        return networkName;
+        const networkId = await web3.eth.net.getId()
+        switch (networkId) {
+            case 1:
+                return 'Mainnet'
+            case 3:
+                return 'Ropsten'
+            case 4:
+                return 'Rinkeby'
+            case 42:
+                return 'Kovan' 
+            default:
+                return 'Unknown'
+        }
     }
     
     async getBalance(): Promise<BN> {
