@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "abi-decoder": "^1.2.0",
+    "axios": "^0.18.0",
     "bignumber.js": "^8.0.1",
     "bip39": "^2.5.0",
     "cheerio": "^1.0.0-rc.2",
