@@ -1,6 +1,10 @@
 {
-    "Address": {
-        "Owner": "0xCE3E5C43bcF9BB937D50653BB830723fa477ED1E",
-        "User1": "0x180d1eC6665f9d636905F1869C1bc98DE2e8b121"
+  "Address": {
+    "Owner": {
+      "publickey": "0xCE3E5C43bcF9BB937D50653BB830723fa477ED1E"
+    },
+    "User1": {
+      "publickey": "0x180d1eC6665f9d636905F1869C1bc98DE2e8b121"
     }
+  }
 }
