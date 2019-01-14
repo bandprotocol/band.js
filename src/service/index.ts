@@ -1,3 +1,3 @@
-import BandProtocolClient from './bandProtocolClient'
+import BandProtocolClient from './BandProtocolClient'
 
 export { BandProtocolClient }
