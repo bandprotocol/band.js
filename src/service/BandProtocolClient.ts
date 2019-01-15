@@ -3,7 +3,7 @@ import BN from 'bn.js'
 import { Provider } from 'web3/providers'
 import BaseClient from './BaseClient'
 import axios from 'axios'
-import * as config from '../config.json'
+import config from '../config'
 import CommunityTokenClient from './communityTokenClient'
 import { JsonResponse, Address } from '../typing/index'
 

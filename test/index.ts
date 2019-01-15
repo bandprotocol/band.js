@@ -1,6 +1,6 @@
 import BandProtocolClient from '../src'
 // import * as Seed from './Seed.json'
-import * as config from './config-private.json'
+import config from './config-private'
 import Web3 from 'web3'
 import BN from 'bn.js'
 
@@ -68,8 +68,8 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
     )
 
     // buy and sell XCH by BandToken
-    console.log(await XCHClient.buy(buyAmount, buyPrice))
-    console.log(await XCHClient.sell(sellAmount, sellPrice))
+    // console.log(await XCHClient.buy(buyAmount, buyPrice))
+    // console.log(await XCHClient.sell(sellAmount, sellPrice))
 
     // get order history
     console.log(

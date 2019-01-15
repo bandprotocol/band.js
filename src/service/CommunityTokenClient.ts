@@ -1,7 +1,7 @@
 import Web3 from 'web3'
 import BaseClient from './BaseClient'
 import BN from 'bn.js'
-import * as config from '../config.json'
+import config from '../config'
 import { JsonResponse, OrderHistory, Address } from '../typing/index'
 import axios from 'axios'
 

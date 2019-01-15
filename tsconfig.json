@@ -2,13 +2,14 @@
   "compilerOptions": {
     "declaration": true,
     "esModuleInterop": true,
+    "lib": ["es2015", "dom"],
     "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es5",
     "outDir": "./dist",
     "strict": true,
-    "target": "es2017",
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "resolveJsonModule": true
+    "noUnusedParameters": true
   },
   "include": ["./src/**/*", "./test/**/*"]
 }
