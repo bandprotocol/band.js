@@ -4,8 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "tsc && node dist/test/index.js",
-    "build": "tsc",
+    "start": "yarn clear && tsc && node dist/test/index.js",
+    "build": "yarn clear && tsc",
+    "clear": "rm -rf dist/",
     "doc": "typedoc --out doc/ src/ --module commonjs --target es2017 && open doc/index.html"
   },
   "dependencies": {
