@@ -4,4 +4,4 @@
 /tmp
 /test/.env
 /doc
-/src/config-private.json
+/test/config-private.json
