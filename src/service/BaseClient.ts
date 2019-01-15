@@ -4,7 +4,7 @@ import { Address } from '../typing'
 export default class BaseClient {
   protected web3?: Web3
 
-  constructor(web3?: Web3) {
+  protected constructor(web3?: Web3) {
     this.web3 = web3
   }
 

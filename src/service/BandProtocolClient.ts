@@ -8,7 +8,7 @@ import CommunityTokenClient from './communityTokenClient'
 import { JsonResponse, Address } from '../typing/index'
 
 export default class BandProtocolClient extends BaseClient {
-  constructor(web3?: Web3) {
+  private constructor(web3?: Web3) {
     super(web3)
   }
 
