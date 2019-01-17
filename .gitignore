@@ -4,4 +4,7 @@
 /tmp
 /test/.env
 /doc
-/test/config-private.json
+/lib
+/example
+/test/config-private.ts
+.vscode
