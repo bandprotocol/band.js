@@ -1,10 +1,16 @@
 import BN from 'bn.js'
 
+/**
+ * This is a interface of object that response from axios.
+ */
 export interface JsonResponse {
   result?: any
   message?: string
 }
 
+/**
+ * This is interface of object for getOrderHistory function.
+ */
 export interface OrderHistory {
   user: Address
   order_type: string
@@ -13,4 +19,7 @@ export interface OrderHistory {
   block_time: string
 }
 
+/**
+ * alias
+ */
 export type Address = string

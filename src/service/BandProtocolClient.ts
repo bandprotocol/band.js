@@ -7,6 +7,9 @@ import config from '../config'
 import CommunityTokenClient from './communityTokenClient'
 import { JsonResponse, Address } from '../typing/index'
 
+/**
+ * This is class for get balance and transfer BandToken.
+ */
 export default class BandProtocolClient extends BaseClient {
   private constructor(web3?: Web3) {
     super(web3)
@@ -26,6 +29,12 @@ export default class BandProtocolClient extends BaseClient {
     return response.data.result
   }
 
+  /**
+   * This is function with creating
+   *
+   * @param args A provider's object.
+   * @returns An instance of BandProtocolClient.
+   */
   static async make(args: { provider?: Provider }) {
     if (args.provider !== undefined) {
       const web3: Web3 = new Web3(args.provider)
@@ -35,6 +44,11 @@ export default class BandProtocolClient extends BaseClient {
     }
   }
 
+  /**
+   *
+   * @param coreAddress A CommunityCore's address.
+   * @returns An instance of CommunityTokenClient.
+   */
   async at(coreAddress: Address) {
     const response = await axios.get<JsonResponse>(`${config.api}/dapps`)
     const filterDapps = response.data.result.dapps.filter(
@@ -47,6 +61,11 @@ export default class BandProtocolClient extends BaseClient {
     return new CommunityTokenClient(this.web3, filterDapps[0].address)
   }
 
+  /***
+   * This is a function what the user's network currently use.
+   *
+   * @returns A network's type.(eg. Mainnet, Ropsten and so on)
+   */
   async getNetworkType(): Promise<string> {
     if (this.web3 === undefined) throw new Error('Required provider.')
     const networkId = await this.web3.eth.net.getId()
@@ -64,12 +83,23 @@ export default class BandProtocolClient extends BaseClient {
     }
   }
 
+  /**
+   * This is function that returns user's BandToken balance.
+   *
+   * @returns A balance.
+   */
   async getBalance(): Promise<BN> {
     const account = await this.getAccount()
     const result = await this.getRequest(`/balance/${account}`)
     return new BN(result.balance)
   }
 
+  /**
+   * This is function that transfers BandToken.
+   *
+   * @param to A receiver.
+   * @param value An amounts.
+   */
   async transfer(to: Address, value: string | BN) {
     const valueString = BN.isBN(value) ? value.toString() : value
     const { to: bandAddress, data } = await this.postRequest('/transfer', {

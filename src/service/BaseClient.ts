@@ -1,6 +1,9 @@
 import Web3 from 'web3'
 import { Address } from '../typing'
 
+/**
+ * This is a BaseClient Class
+ */
 export default class BaseClient {
   protected web3?: Web3
 
