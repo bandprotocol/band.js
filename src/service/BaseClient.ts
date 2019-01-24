@@ -11,18 +11,22 @@ export default class BaseClient {
     this.web3 = web3
   }
 
+  protected throw(m: string): never {
+    throw new Error(m)
+  }
+
   protected async getAccount(): Promise<Address> {
-    if (this.web3 === undefined) throw new Error('Required provider.')
+    if (this.web3 === undefined) return this.throw('Required provider.')
     return (await this.web3.eth.getAccounts())[0]
   }
 
   protected async sendTransaction(to: Address, data: string) {
-    if (this.web3 === undefined) throw new Error('Required provider.')
+    if (this.web3 === undefined) return this.throw('Required provider.')
     return await this.web3.eth.sendTransaction({
       from: await this.getAccount(),
       to,
       data,
-      gas: '300000', // TODO: Fix gas cost hardcode
+      gas: await this.web3.eth.estimateGas({ to, data }),
     })
   }
 }

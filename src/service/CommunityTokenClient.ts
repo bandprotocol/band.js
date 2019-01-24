@@ -16,14 +16,18 @@ export default class CommunityTokenClient extends BaseClient {
   private async getRequest(path: string, params?: any): Promise<any> {
     const url = config.api + '/dapps/' + this.coreAddress + path
     const response = await axios.get<JsonResponse>(url, { params })
-    if (response.data.message !== undefined) throw Error(response.data.message)
+    if (response.data.message !== undefined) {
+      return this.throw(response.data.message)
+    }
     return response.data.result
   }
 
   private async postRequest(path: string, data: any): Promise<any> {
     const url = config.api + '/dapps/' + this.coreAddress + path
     const response = await axios.post<JsonResponse>(url, data)
-    if (response.data.message !== undefined) throw Error(response.data.message)
+    if (response.data.message !== undefined) {
+      return this.throw(response.data.message)
+    }
     return response.data.result
   }
 
@@ -56,6 +60,29 @@ export default class CommunityTokenClient extends BaseClient {
       value: new BN(e.value),
       price: new BN(e.price),
     }))
+  }
+
+  async reportDetail({
+    name,
+    symbol,
+    logo,
+    description,
+    website,
+  }: {
+    name: string
+    symbol: string
+    logo: string
+    description: string
+    website: string
+  }) {
+    // report to server
+    await this.postRequest(`/detail`, {
+      name,
+      symbol,
+      logo,
+      description,
+      website,
+    })
   }
 
   async transfer(to: Address, value: string | BN) {

@@ -23,3 +23,4 @@ export interface OrderHistory {
  * alias
  */
 export type Address = string
+export type Equation = string

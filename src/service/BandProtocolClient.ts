@@ -5,7 +5,7 @@ import BaseClient from './BaseClient'
 import axios from 'axios'
 import config from '../config'
 import CommunityTokenClient from './communityTokenClient'
-import { JsonResponse, Address } from '../typing/index'
+import { JsonResponse, Address, Equation } from '../typing/index'
 
 /**
  * This is class for get balance and transfer BandToken.
@@ -18,14 +18,18 @@ export default class BandProtocolClient extends BaseClient {
   private async getRequest(path: string): Promise<any> {
     const url = config.api + '/band' + path
     const response = await axios.get<JsonResponse>(url)
-    if (response.data.message !== undefined) throw Error(response.data.message)
+    if (response.data.message !== undefined) {
+      return this.throw(response.data.message)
+    }
     return response.data.result
   }
 
   private async postRequest(path: string, data: any): Promise<any> {
     const url = config.api + '/band' + path
     const response = await axios.post<JsonResponse>(url, data)
-    if (response.data.message !== undefined) throw Error(response.data.message)
+    if (response.data.message !== undefined) {
+      return this.throw(response.data.message)
+    }
     return response.data.result
   }
 
@@ -44,6 +48,49 @@ export default class BandProtocolClient extends BaseClient {
     }
   }
 
+  async deployCommunity(
+    name: string,
+    symbol: string,
+    logo: string,
+    description: string,
+    website: string,
+    voting: Address,
+    keys: string[],
+    values: (string | number)[],
+    equation: Equation,
+  ) {
+    const { to, data } = await this.postRequest('/create-dapp', {
+      name,
+      symbol,
+      decimal: 18,
+      voting,
+      keys,
+      values,
+      equation,
+    })
+
+    const { logs } = await this.sendTransaction(to, data)
+    const chunk = logs
+      ? logs[logs.length - 1].data
+      : this.throw("Transaction's logs is invalid.")
+    const tokenAddress = '0x' + (chunk as string).slice(90, 130)
+    const paramAddress = '0x' + (chunk as string).slice(154, 194)
+    const coreAddress = '0x' + (chunk as string).slice(218, 258)
+    console.log('tokenAddress', tokenAddress)
+    console.log('paramAddress', paramAddress)
+    console.log('coreAddress', coreAddress)
+
+    const communityClient = await this.at(coreAddress)
+    await communityClient.reportDetail({
+      name,
+      symbol,
+      logo,
+      description,
+      website,
+    })
+    return communityClient
+  }
+
   /**
    *
    * @param coreAddress A CommunityCore's address.
@@ -52,12 +99,14 @@ export default class BandProtocolClient extends BaseClient {
   async at(coreAddress: Address) {
     const response = await axios.get<JsonResponse>(`${config.api}/dapps`)
     const filterDapps = response.data.result.dapps.filter(
-      (element: any) => element.address === coreAddress,
+      (element: any) => element.address.toLowerCase() === coreAddress,
     )
     if (filterDapps.length === 0) {
-      throw new Error("This dapp contract's address is invalid.")
+      return this.throw("This dapp contract's address is invalid.")
     }
-    if (response.data.message !== undefined) throw Error(response.data.message)
+    if (response.data.message !== undefined) {
+      return this.throw(response.data.message)
+    }
     return new CommunityTokenClient(this.web3, filterDapps[0].address)
   }
 
@@ -67,7 +116,9 @@ export default class BandProtocolClient extends BaseClient {
    * @returns A network's type.(eg. Mainnet, Ropsten and so on)
    */
   async getNetworkType(): Promise<string> {
-    if (this.web3 === undefined) throw new Error('Required provider.')
+    if (this.web3 === undefined) {
+      return this.throw('Required provider.')
+    }
     const networkId = await this.web3.eth.net.getId()
     switch (networkId) {
       case 1:
