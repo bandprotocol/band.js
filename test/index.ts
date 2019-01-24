@@ -123,5 +123,38 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
     //     '1000000000000000000',
     //   ),
     // )
+
+    // get order history
+    // console.log(
+    //   await XCHClient.getOrderHistory({
+    //     limit: 2,
+    //     user: accountAddress,
+    //     type: 'sell',
+    //   }),
+    // )
+
+    // Add new reward to merkle and report new reward
+    const rewardID = await XCHClient.addNewReward(
+      [
+        '0xCE3E5C43bcF9BB937D50653BB830723fa477ED1E',
+        '0x8208940DA3bDEfE1d3e4B5Ee5d4EeBf19AAe0468',
+      ],
+      [60, 40],
+    )
+
+    console.log('rewardID', rewardID)
+
+    // have to wait 1 minute
+    // User Action
+    // check reward
+    // const rewardID = 7
+    console.log('reward', await XCHClient.getReward(rewardID))
+
+    // claim reward
+    console.log(await XCHClient.sendClaimReward(rewardID))
+
+    // get Reward Detail
+    const { totalReward, claimed } = await XCHClient.getRewardDetail(rewardID)
+    console.log(`Number of claimed: ${claimed} Total Reward: ${totalReward}`)
   }
 })()

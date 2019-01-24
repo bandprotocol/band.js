@@ -8,6 +8,7 @@
     "build": "tsc",
     "dev": "yarn clear && tsc && node lib/test/index.js",
     "clear": "rm -rf ./lib",
+    "dev": "yarn clear && tsc && node lib/test/index.js",
     "prepare": "npm run build",
     "doc": "typedoc --out doc/ src/ --module commonjs --target es2017 && open doc/index.html"
   },

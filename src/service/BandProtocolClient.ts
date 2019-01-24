@@ -99,7 +99,8 @@ export default class BandProtocolClient extends BaseClient {
   async at(coreAddress: Address) {
     const response = await axios.get<JsonResponse>(`${config.api}/dapps`)
     const filterDapps = response.data.result.dapps.filter(
-      (element: any) => element.address.toLowerCase() === coreAddress,
+      (element: any) =>
+        element.address.toLowerCase() === coreAddress.toLowerCase(),
     )
     if (filterDapps.length === 0) {
       return this.throw("This dapp contract's address is invalid.")
