@@ -1,11 +1,9 @@
-import Web3 from 'web3'
 import BN from 'bn.js'
+import Web3 from 'web3'
 import { Provider } from 'web3/providers'
 import BaseClient from './BaseClient'
-import axios from 'axios'
-import config from '../config'
 import CommunityTokenClient from './communityTokenClient'
-import { JsonResponse, Address, Equation } from '../typing/index'
+import { Address, Equation } from '../typing/index'
 
 /**
  * This is class for get balance and transfer BandToken.
@@ -13,24 +11,6 @@ import { JsonResponse, Address, Equation } from '../typing/index'
 export default class BandProtocolClient extends BaseClient {
   private constructor(web3?: Web3) {
     super(web3)
-  }
-
-  private async getRequest(path: string): Promise<any> {
-    const url = config.api + '/band' + path
-    const response = await axios.get<JsonResponse>(url)
-    if (response.data.message !== undefined) {
-      return this.throw(response.data.message)
-    }
-    return response.data.result
-  }
-
-  private async postRequest(path: string, data: any): Promise<any> {
-    const url = config.api + '/band' + path
-    const response = await axios.post<JsonResponse>(url, data)
-    if (response.data.message !== undefined) {
-      return this.throw(response.data.message)
-    }
-    return response.data.result
   }
 
   /**
@@ -59,7 +39,7 @@ export default class BandProtocolClient extends BaseClient {
     values: (string | number)[],
     equation: Equation,
   ) {
-    const { to, data } = await this.postRequest('/create-dapp', {
+    const { to, data } = await this.postRequestBand('/create-dapp', {
       name,
       symbol,
       decimal: 18,
@@ -73,13 +53,7 @@ export default class BandProtocolClient extends BaseClient {
     const chunk = logs
       ? logs[logs.length - 1].data
       : this.throw("Transaction's logs is invalid.")
-    const tokenAddress = '0x' + (chunk as string).slice(90, 130)
-    const paramAddress = '0x' + (chunk as string).slice(154, 194)
-    const coreAddress = '0x' + (chunk as string).slice(218, 258)
-    console.log('tokenAddress', tokenAddress)
-    console.log('paramAddress', paramAddress)
-    console.log('coreAddress', coreAddress)
-
+    const coreAddress = '0x' + chunk.slice(218, 258)
     const communityClient = await this.at(coreAddress)
     await communityClient.reportDetail({
       name,
@@ -97,16 +71,13 @@ export default class BandProtocolClient extends BaseClient {
    * @returns An instance of CommunityTokenClient.
    */
   async at(coreAddress: Address) {
-    const response = await axios.get<JsonResponse>(`${config.api}/dapps`)
-    const filterDapps = response.data.result.dapps.filter(
+    const { dapps } = await this.getRequest('/dapps')
+    const filterDapps = dapps.filter(
       (element: any) =>
         element.address.toLowerCase() === coreAddress.toLowerCase(),
     )
     if (filterDapps.length === 0) {
       return this.throw("This dapp contract's address is invalid.")
-    }
-    if (response.data.message !== undefined) {
-      return this.throw(response.data.message)
     }
     return new CommunityTokenClient(this.web3, filterDapps[0].address)
   }
@@ -142,7 +113,7 @@ export default class BandProtocolClient extends BaseClient {
    */
   async getBalance(): Promise<BN> {
     const account = await this.getAccount()
-    const result = await this.getRequest(`/balance/${account}`)
+    const result = await this.getRequestBand(`/balance/${account}`)
     return new BN(result.balance)
   }
 
@@ -154,11 +125,19 @@ export default class BandProtocolClient extends BaseClient {
    */
   async transfer(to: Address, value: string | BN) {
     const valueString = BN.isBN(value) ? value.toString() : value
-    const { to: bandAddress, data } = await this.postRequest('/transfer', {
+    const { to: bandAddress, data } = await this.postRequestBand('/transfer', {
       to: to,
       value: valueString,
     })
 
     return this.sendTransaction(bandAddress, data)
+  }
+
+  private async getRequestBand(path: string): Promise<any> {
+    return await this.getRequest(`/band${path}`)
+  }
+
+  private async postRequestBand(path: string, data: any): Promise<any> {
+    return await this.postRequest(`/band${path}`, data)
   }
 }
