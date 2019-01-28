@@ -2,57 +2,57 @@ import BandProtocolClient from '../src'
 // import * as Seed from './Seed.json'
 import config from './config-private'
 import Web3 from 'web3'
-// import BN from 'bn.js'
+import BN from 'bn.js'
 
 const ipc = config.gethConnection + 'geth.ipc'
 const provider = new Web3.providers.IpcProvider(ipc, require('net'))
 
   // Band Test
-  // ;(async () => {
-  //   const bandClient = await BandProtocolClient.make({
-  //     provider: provider,
-  //   })
-  //   const x = await bandClient.getNetworkType()
-  //   console.log('Network: ', x)
+;(async () => {
+  const bandClient = await BandProtocolClient.make({
+    provider: provider,
+  })
+  const x = await bandClient.getNetworkType()
+  console.log('Network: ', x)
 
-  //   const y = await bandClient.getBalance()
-  //   console.log('Owner Balance:', y)
-  //   const web3: Web3 = new Web3(provider)
-  //   const accountAddress = (await web3.eth.getAccounts())[0]
-  //   console.log(accountAddress)
-  //   await web3.eth.personal.unlockAccount(
-  //     accountAddress,
-  //     config.accountPassword,
-  //     100,
-  //   )
-  //   if (bandClient !== undefined) {
-  //     console.log(
-  //       await bandClient.transfer(
-  //         '0x180d1eC6665f9d636905F1869C1bc98DE2e8b121',
-  //         new BN('1000000000000000000'),
-  //       ),
-  //     )
-  //     console.log(
-  //       await bandClient.at('0x1B3DEAe804474A4254cA78EBd07a854f98bD1110'),
-  //     )
-  //   }
-  // })()
+  const y = await bandClient.getBalance()
+  console.log('Owner Balance:', y)
+  const web3: Web3 = new Web3(provider)
+  const accountAddress = (await web3.eth.getAccounts())[0]
+  console.log(accountAddress)
+  await web3.eth.personal.unlockAccount(
+    accountAddress,
+    config.accountPassword,
+    100,
+  )
+  if (bandClient !== undefined) {
+    console.log(
+      await bandClient.transfer(
+        '0x180d1eC6665f9d636905F1869C1bc98DE2e8b121',
+        new BN('1000000000000000000'),
+      ),
+    )
+    console.log(
+      await bandClient.at('0x1B3DEAe804474A4254cA78EBd07a854f98bD1110'),
+    )
+  }
+})()
 
-  // Community Test
+// Community Test
 ;(async () => {
   const bandClient = await BandProtocolClient.make({
     provider: provider,
   })
   if (bandClient !== undefined) {
-    const web3: Web3 = new Web3(provider)
-    console.log(await bandClient.getNetworkType())
-    const accountAddress = (await web3.eth.getAccounts())[0]
-    console.log(accountAddress)
-    await web3.eth.personal.unlockAccount(
-      accountAddress,
-      config.accountPassword,
-      500,
-    )
+    // const web3: Web3 = new Web3(provider)
+    // console.log(await bandClient.getNetworkType())
+    // const accountAddress = (await web3.eth.getAccounts())[0]
+    // console.log(accountAddress)
+    // await web3.eth.personal.unlockAccount(
+    //   accountAddress,
+    //   config.accountPassword,
+    //   500,
+    // )
     // const XCHClient = await bandClient.deployCommunity(
     //   'PapaCoin',
     //   'MMC',
@@ -94,9 +94,9 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
     //   ],
     //   '(x^2/2000000000000000000000000000000000000)^2',
     // )
-    const XCHClient = await bandClient.at(
-      '0x274Dc11053569DdD88BE25e3A71CfBc22944a3B0',
-    )
+    // const XCHClient = await bandClient.at(
+    //   '0x274Dc11053569DdD88BE25e3A71CfBc22944a3B0',
+    // )
     // console.log((await XCHClient.getBalance()).toString())
     // // buy XCH by BandToken
     // const buyAmount = '10000000000000000000'
@@ -119,32 +119,31 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
     //   }),
     // )
     // transfer XCH
-    console.log(
-      await XCHClient.transfer(
-        '0x274Dc11053569DdD88BE25e3A71CfBc22944a3B0',
-        '1000000000000000000',
-      ),
-    )
+    // console.log(
+    //   await XCHClient.transfer(
+    //     '0x274Dc11053569DdD88BE25e3A71CfBc22944a3B0',
+    //     '1000000000000000000',
+    //   ),
+    // )
     // // Add new reward to merkle and report new reward
-    const rewardID = await XCHClient.sendNewReward(
-      [
-        '0xCE3E5C43bcF9BB937D50653BB830723fa477ED1E',
-        '0x8208940DA3bDEfE1d3e4B5Ee5d4EeBf19AAe0468',
-      ],
-      [40, 60],
-    )
-    console.log('rewardID', rewardID)
-
-    setTimeout(async () => {
-      // ================HAVE TO WAITTING 2 MINUTE========================
-      // const rewardID = 6
-      console.log('reward', await XCHClient.getReward(rewardID))
-      // claim reward
-      console.log(await XCHClient.sendClaimReward(rewardID))
-      // get Reward Detail
-      const { totalReward, claimed } = await XCHClient.getRewardDetail(rewardID)
-      console.log(`Number of claimed: ${claimed} Total Reward: ${totalReward}`)
-      console.log('Owner Balance:', (await bandClient.getBalance()).toString())
-    }, 121000)
+    // const rewardID = await XCHClient.sendNewReward(
+    //   [
+    //     '0xCE3E5C43bcF9BB937D50653BB830723fa477ED1E',
+    //     '0x8208940DA3bDEfE1d3e4B5Ee5d4EeBf19AAe0468',
+    //   ],
+    //   [40, 60],
+    // )
+    // console.log('rewardID', rewardID)
+    // setTimeout(async () => {
+    //   // ================HAVE TO WAITTING 2 MINUTE========================
+    //   // const rewardID = 6
+    //   console.log('reward', await XCHClient.getReward(rewardID))
+    //   // claim reward
+    //   console.log(await XCHClient.sendClaimReward(rewardID))
+    //   // get Reward Detail
+    //   const { totalReward, claimed } = await XCHClient.getRewardDetail(rewardID)
+    //   console.log(`Number of claimed: ${claimed} Total Reward: ${totalReward}`)
+    //   console.log('Owner Balance:', (await bandClient.getBalance()).toString())
+    // }, 121000)
   }
 })()
