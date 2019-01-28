@@ -2,52 +2,55 @@ import BandProtocolClient from '../src'
 // import * as Seed from './Seed.json'
 import config from './config-private'
 import Web3 from 'web3'
-import BN from 'bn.js'
+// import BN from 'bn.js'
 
 const ipc = config.gethConnection + 'geth.ipc'
 const provider = new Web3.providers.IpcProvider(ipc, require('net'))
 
   // Band Test
+  // ;(async () => {
+  //   const bandClient = await BandProtocolClient.make({
+  //     provider: provider,
+  //   })
+  //   const x = await bandClient.getNetworkType()
+  //   console.log('Network: ', x)
+
+  //   const y = await bandClient.getBalance()
+  //   console.log('Owner Balance:', y)
+  //   const web3: Web3 = new Web3(provider)
+  //   const accountAddress = (await web3.eth.getAccounts())[0]
+  //   console.log(accountAddress)
+  //   await web3.eth.personal.unlockAccount(
+  //     accountAddress,
+  //     config.accountPassword,
+  //     100,
+  //   )
+  //   if (bandClient !== undefined) {
+  //     console.log(
+  //       await bandClient.transfer(
+  //         '0x180d1eC6665f9d636905F1869C1bc98DE2e8b121',
+  //         new BN('1000000000000000000'),
+  //       ),
+  //     )
+  //     console.log(
+  //       await bandClient.at('0x1B3DEAe804474A4254cA78EBd07a854f98bD1110'),
+  //     )
+  //   }
+  // })()
+
+  // Community Test
 ;(async () => {
   const bandClient = await BandProtocolClient.make({
     provider: provider,
   })
-  const x = await bandClient.getNetworkType()
-  console.log('Network: ', x)
-
-  const y = await bandClient.getBalance()
-  console.log('Owner Balance:', y)
-  const web3: Web3 = new Web3(provider)
-  const accountAddress = (await web3.eth.getAccounts())[0]
-  console.log(accountAddress)
-  await web3.eth.personal.unlockAccount(
-    accountAddress,
-    config.accountPassword,
-    100,
-  )
   if (bandClient !== undefined) {
-    console.log(
-      await bandClient.transfer(
-        '0x180d1eC6665f9d636905F1869C1bc98DE2e8b121',
-        new BN('1000000000000000000'),
-      ),
-    )
-    console.log(
-      await bandClient.at('0x1B3DEAe804474A4254cA78EBd07a854f98bD1110'),
-    )
-  }
-})()
+    const web3: Web3 = new Web3(provider)
+    console.log(await bandClient.getNetworkType())
+    const accountAddress = (await web3.eth.getAccounts())[0]
+    console.log(accountAddress)
+    console.log(await bandClient.getBand())
+    console.log(await bandClient.getDApps())
 
-// Community Test
-;(async () => {
-  const bandClient = await BandProtocolClient.make({
-    provider: provider,
-  })
-  if (bandClient !== undefined) {
-    // const web3: Web3 = new Web3(provider)
-    // console.log(await bandClient.getNetworkType())
-    // const accountAddress = (await web3.eth.getAccounts())[0]
-    // console.log(accountAddress)
     // await web3.eth.personal.unlockAccount(
     //   accountAddress,
     //   config.accountPassword,

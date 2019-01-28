@@ -3,7 +3,7 @@ import Web3 from 'web3'
 import { Provider } from 'web3/providers'
 import BaseClient from './BaseClient'
 import CommunityTokenClient from './communityTokenClient'
-import { Address, Equation } from '../typing/index'
+import { Address, Equation, BandInfo, DappInfo } from '../typing/index'
 
 /**
  * This is class for get balance and transfer BandToken.
@@ -26,6 +26,16 @@ export default class BandProtocolClient extends BaseClient {
     } else {
       return new BandProtocolClient()
     }
+  }
+
+  async getBand(): Promise<BandInfo> {
+    const result = await this.getRequest('/dapps')
+    return result.band
+  }
+
+  async getDApps(): Promise<DappInfo[]> {
+    const result = await this.getRequest('/dapps')
+    return result.dapps
   }
 
   async deployCommunity(

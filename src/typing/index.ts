@@ -24,3 +24,15 @@ export interface OrderHistory {
  */
 export type Address = string
 export type Equation = string
+
+export interface BandInfo {
+  address: Address
+}
+
+export interface DappInfo {
+  name: string
+  logo: string
+  description: string
+  website: string
+  address: Address
+}
