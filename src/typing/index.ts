@@ -27,6 +27,8 @@ export type Equation = string
 
 export interface BandInfo {
   address: Address
+  price: number
+  last24Hrs: number
 }
 
 export interface DappInfo {
@@ -35,4 +37,7 @@ export interface DappInfo {
   description: string
   website: string
   address: Address
+  marketCap: BN
+  price: BN
+  last24Hrs: number
 }
