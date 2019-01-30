@@ -17,6 +17,7 @@ export interface OrderHistory {
   value: BN
   price: BN
   block_time: string
+  tx_hash: string
 }
 
 /**

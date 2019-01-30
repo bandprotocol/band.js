@@ -4,7 +4,7 @@ import BN from 'bn.js'
 import BaseClient from './BaseClient'
 import { OrderHistory, Address } from '../typing/index'
 
-export default class CommunityTokenClient extends BaseClient {
+export default class CommunityClient extends BaseClient {
   private coreAddress?: Address
 
   constructor(web3?: Web3, coreAddress?: Address) {

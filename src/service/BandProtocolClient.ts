@@ -2,7 +2,7 @@ import BN from 'bn.js'
 import Web3 from 'web3'
 import { Provider } from 'web3/providers'
 import BaseClient from './BaseClient'
-import CommunityTokenClient from './communityTokenClient'
+import CommunityClient from './CommunityClient'
 import { Address, Equation, BandInfo, DappInfo } from '../typing/index'
 
 /**
@@ -83,7 +83,7 @@ export default class BandProtocolClient extends BaseClient {
   /**
    *
    * @param coreAddress A CommunityCore's address.
-   * @returns An instance of CommunityTokenClient.
+   * @returns An instance of CommunityClient.
    */
   async at(coreAddress: Address) {
     const { dapps } = await this.getRequest('/dapps')
@@ -94,7 +94,7 @@ export default class BandProtocolClient extends BaseClient {
     if (filterDapps.length === 0) {
       return this.throw("This dapp contract's address is invalid.")
     }
-    return new CommunityTokenClient(this.web3, filterDapps[0].address)
+    return new CommunityClient(this.web3, filterDapps[0].address)
   }
 
   /***
