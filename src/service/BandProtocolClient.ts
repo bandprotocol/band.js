@@ -43,6 +43,17 @@ export default class BandProtocolClient extends BaseClient {
     }))
   }
 
+  async enableEthereum() {
+    if (this.web3 === undefined) {
+      return this.throw('Required provider.')
+    }
+    // TODO: make it offcial
+    const enable = (this.web3.currentProvider as any).enable
+    if (enable) {
+      enable()
+    }
+  }
+
   async createDeployTransaction(
     name: string,
     symbol: string,
