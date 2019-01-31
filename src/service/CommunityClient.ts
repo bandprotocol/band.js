@@ -65,7 +65,7 @@ export default class CommunityClient extends BaseClient {
     })
   }
 
-  async transfer(to: Address, value: string | BN) {
+  async createTransferTransaction(to: Address, value: string | BN) {
     const valueString = BN.isBN(value) ? value.toString() : value
     const { to: tokenAddress, data } = await this.postRequestDApps(
       '/transfer',
@@ -75,10 +75,10 @@ export default class CommunityClient extends BaseClient {
       },
     )
 
-    return this.sendTransaction(tokenAddress, data)
+    return this.createTransaction(tokenAddress, data)
   }
 
-  async buy(amount: string | BN, priceLimit: string | BN) {
+  async createBuyTransaction(amount: string | BN, priceLimit: string | BN) {
     const amountString = BN.isBN(amount) ? amount.toString() : amount
     const priceLimitString = BN.isBN(priceLimit)
       ? priceLimit.toString()
@@ -87,10 +87,10 @@ export default class CommunityClient extends BaseClient {
       value: amountString,
       price_limit: priceLimitString,
     })
-    return this.sendTransaction(tokenAddress, data)
+    return this.createTransaction(tokenAddress, data)
   }
 
-  async sell(amount: string | BN, priceLimit: string | BN) {
+  async createSellTransaction(amount: string | BN, priceLimit: string | BN) {
     const amountString = BN.isBN(amount) ? amount.toString() : amount
     const priceLimitString = BN.isBN(priceLimit)
       ? priceLimit.toString()
@@ -99,10 +99,10 @@ export default class CommunityClient extends BaseClient {
       value: amountString,
       price_limit: priceLimitString,
     })
-    return this.sendTransaction(tokenAddress, data)
+    return this.createTransaction(tokenAddress, data)
   }
 
-  async sendNewReward(keys: Address[], values: number[]): Promise<number> {
+  async createNewRewardTransaction(keys: Address[], values: number[]) {
     const { root_hash: rootHash } = await this.postRequestMerkle('', {
       keys,
       values,
@@ -116,11 +116,7 @@ export default class CommunityClient extends BaseClient {
       },
     )
 
-    const result = await this.sendTransaction(tokenAddress, data)
-    if (result.logs === undefined) {
-      return this.throw('Cannot report reward.')
-    }
-    return parseInt(result.logs[0].topics[1])
+    return this.createTransaction(tokenAddress, data)
   }
 
   async getRewardDetail(
@@ -144,7 +140,7 @@ export default class CommunityClient extends BaseClient {
     return result[0].value
   }
 
-  async sendClaimReward(rewardID: number) {
+  async createClaimRewardTransaction(rewardID: number) {
     const { rootHash } = await this.getRewardDetail(rewardID)
     const account = await this.getAccount()
     const proof = await this.getRequestMerkle(`/${rootHash}/proof/${account}`)
@@ -157,7 +153,7 @@ export default class CommunityClient extends BaseClient {
         proof: proof,
       },
     )
-    return this.sendTransaction(tokenAddress, data)
+    return this.createTransaction(tokenAddress, data)
   }
 
   private async getRequestDApps(path: string, params?: any): Promise<any> {

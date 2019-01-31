@@ -34,6 +34,7 @@ export interface BandInfo {
 
 export interface DappInfo {
   name: string
+  symbol: string
   logo: string
   description: string
   website: string

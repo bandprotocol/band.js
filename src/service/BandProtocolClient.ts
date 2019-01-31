@@ -1,6 +1,6 @@
 import BN from 'bn.js'
 import Web3 from 'web3'
-import { Provider } from 'web3/providers'
+// import { Provider } from 'web3/providers'  TODO: bring back provider type
 import BaseClient from './BaseClient'
 import CommunityClient from './CommunityClient'
 import { Address, Equation, BandInfo, DappInfo } from '../typing/index'
@@ -19,7 +19,7 @@ export default class BandProtocolClient extends BaseClient {
    * @param args A provider's object.
    * @returns An instance of BandProtocolClient.
    */
-  static async make(args: { provider?: Provider }) {
+  static async make(args: { provider: any }) {
     if (args.provider !== undefined) {
       const web3: Web3 = new Web3(args.provider)
       return new BandProtocolClient(web3)
@@ -43,7 +43,7 @@ export default class BandProtocolClient extends BaseClient {
     }))
   }
 
-  async deployCommunity(
+  async createDeployTransaction(
     name: string,
     symbol: string,
     logo: string,
@@ -64,7 +64,7 @@ export default class BandProtocolClient extends BaseClient {
       equation,
     })
 
-    const { logs } = await this.sendTransaction(to, data)
+    const { logs } = await (await this.createTransaction(to, data)).send()
     const chunk = logs
       ? logs[logs.length - 1].data
       : this.throw("Transaction's logs is invalid.")
@@ -138,14 +138,14 @@ export default class BandProtocolClient extends BaseClient {
    * @param to A receiver.
    * @param value An amounts.
    */
-  async transfer(to: Address, value: string | BN) {
+  async createTransferTransaction(to: Address, value: string | BN) {
     const valueString = BN.isBN(value) ? value.toString() : value
     const { to: bandAddress, data } = await this.postRequestBand('/transfer', {
       to: to,
       value: valueString,
     })
 
-    return this.sendTransaction(bandAddress, data)
+    return this.createTransaction(bandAddress, data)
   }
 
   private async getRequestBand(path: string): Promise<any> {

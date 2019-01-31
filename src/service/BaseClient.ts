@@ -22,18 +22,18 @@ export default class BaseClient {
     return (await this.web3.eth.getAccounts())[0]
   }
 
-  protected async sendTransaction(to: Address, data: string) {
-    if (this.web3 === undefined) return this.throw('Required provider.')
-    return await this.web3.eth.sendTransaction({
-      from: await this.getAccount(),
-      to,
-      data,
-      gas: await this.web3.eth.estimateGas({
-        from: await this.getAccount(),
-        to,
-        data,
-      }),
-    })
+  protected async createTransaction(to: Address, data: string) {
+    const from = await this.getAccount()
+    return {
+      send: () => {
+        if (this.web3 === undefined) return this.throw('Required provider.')
+        return this.web3.eth.sendTransaction({
+          from,
+          to,
+          data,
+        })
+      },
+    }
   }
 
   protected async getRequest(path: string, params?: any): Promise<any> {
