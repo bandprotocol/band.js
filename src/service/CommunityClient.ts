@@ -2,7 +2,7 @@ import _ from 'lodash'
 import Web3 from 'web3'
 import BN from 'bn.js'
 import BaseClient from './BaseClient'
-import { OrderHistory, Address } from '../typing/index'
+import { OrderHistory, Address, Equation } from '../typing/index'
 
 export default class CommunityClient extends BaseClient {
   private coreAddress?: Address
@@ -49,12 +49,16 @@ export default class CommunityClient extends BaseClient {
     logo,
     description,
     website,
+    author,
+    priceEquation,
   }: {
     name: string
     symbol: string
     logo: string
     description: string
     website: string
+    author: string
+    priceEquation: Equation
   }) {
     await this.postRequestDApps(`/detail`, {
       name,
@@ -62,6 +66,8 @@ export default class CommunityClient extends BaseClient {
       logo,
       description,
       website,
+      author,
+      priceEquation,
     })
   }
 

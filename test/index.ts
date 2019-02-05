@@ -43,63 +43,79 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
   const bandClient = await BandProtocolClient.make({
     provider: provider,
   })
+  // console.log(bandClient)
   if (bandClient !== undefined) {
+    // console.log(config)
     const web3: Web3 = new Web3(provider)
+    // console.log(web3)
+    // console.log(bandClient)
     console.log(await bandClient.getNetworkType())
-    const accountAddress = (await web3.eth.getAccounts())[0]
+    const accountAddress = (await web3.eth.getAccounts())[1]
     console.log(accountAddress)
-    console.log(await bandClient.getBand())
-    console.log(await bandClient.getDApps())
-
-    // await web3.eth.personal.unlockAccount(
-    //   accountAddress,
-    //   config.accountPassword,
-    //   500,
-    // )
-    // const XCHClient = await bandClient.deployCommunity(
-    //   'PapaCoin',
-    //   'MMC',
-    //   'https://PapaCoin.com/logo.png',
-    //   'The PapaCoin Band Protocol dApp',
-    //   'https://PapaCoin.com',
-    //   '0x3c5BD7136310F764fCd14FC8fdE56D9243949485',
-    //   [
-    //     'core:admin_contract',
-    //     'core:reward_period',
-    //     'core:reward_edit_period',
-    //     'params:commit_time',
-    //     'params:reveal_time',
-    //     'params:support_required_pct',
-    //     'params:min_participation_pct',
-    //     'admin:min_deposit',
-    //     'admin:apply_stage_length',
-    //     'admin:support_required_pct',
-    //     'admin:min_participation_pct',
-    //     'admin:commit_time',
-    //     'admin:reveal_time',
-    //     'admin:reward_percentage',
-    //   ],
-    //   [
-    //     '427380525782779018038349510307084549229898376811',
-    //     '120',
-    //     '120',
-    //     '60',
-    //     '60',
-    //     '70',
-    //     '10',
-    //     '100',
-    //     '60',
-    //     '50',
-    //     '10',
-    //     '60',
-    //     '60',
-    //     '50',
-    //   ],
-    //   '(x^2/2000000000000000000000000000000000000)^2',
-    // )
+    // console.log(await bandClient.getBand())
+    // console.log(await bandClient.getDApps())
+    await web3.eth.personal.unlockAccount(
+      accountAddress,
+      config.accountPassword,
+      500,
+    )
+    const x: any = await bandClient.deployCommunity(
+      'NewBandApp',
+      'NBA',
+      'https://NewBandApp.com/logo.png',
+      'The Next Band Protocol dApp',
+      'https://NewBandApp.com',
+      'Band Protocol',
+      'x * ((2* x / 2000000000000000000000000000000000000) ^ 2) * curve / 1000000000000',
+      '0x83c8D85227639b2b2141e7a7eed2433C43839D11',
+      [
+        'core:admin_contract',
+        'core:reward_period',
+        'core:reward_edit_period',
+        'params:commit_time',
+        'params:reveal_time',
+        'params:support_required_pct',
+        'params:min_participation_pct',
+        'admin:min_deposit',
+        'admin:apply_stage_length',
+        'admin:support_required_pct',
+        'admin:min_participation_pct',
+        'admin:commit_time',
+        'admin:reveal_time',
+        'admin:reward_percentage',
+      ],
+      [
+        '732867085902066557983618878559109073626010542366',
+        '120',
+        '120',
+        '60',
+        '60',
+        '70',
+        '10',
+        '100',
+        '60',
+        '50',
+        '10',
+        '60',
+        '60',
+        '50',
+      ],
+      '(x^2/2000000000000000000000000000000000000)^2',
+    )
+    console.log(x)
     // const XCHClient = await bandClient.at(
-    //   '0x274Dc11053569DdD88BE25e3A71CfBc22944a3B0',
+    //   '0x87f8a5070ea639912639256f08db05dbf8b7cf47',
     // )
+    // await XCHClient.reportDetail({
+    //   name: 'NewBandApp',
+    //   symbol: 'NBA',
+    //   logo: 'https://NewBandApp.com/logo.png',
+    //   description: 'The Next Band Protocol dApp',
+    //   website: 'https://NewBandApp.com',
+    //   author: 'Band Protocol',
+    //   priceEquation:
+    //     'x * ((2* x / 2000000000000000000000000000000000000) ^ 2) * curve / 1000000000000',
+    // })
     // console.log((await XCHClient.getBalance()).toString())
     // // buy XCH by BandToken
     // const buyAmount = '10000000000000000000'

@@ -58,16 +58,18 @@ export default class BandProtocolClient extends BaseClient {
     }
   }
 
-  async createDeployTransaction(
+  async deployCommunity(
     name: string,
     symbol: string,
     logo: string,
     description: string,
     website: string,
+    author: string,
+    priceEquation: Equation,
     voting: Address,
     keys: string[],
     values: (string | number)[],
-    equation: Equation,
+    collateralEquation: Equation,
   ) {
     const { to, data } = await this.postRequestBand('/create-dapp', {
       name,
@@ -76,7 +78,7 @@ export default class BandProtocolClient extends BaseClient {
       voting,
       keys,
       values,
-      equation,
+      collateralEquation,
     })
 
     const { logs } = await (await this.createTransaction(to, data)).send()
@@ -91,6 +93,8 @@ export default class BandProtocolClient extends BaseClient {
       logo,
       description,
       website,
+      author,
+      priceEquation,
     })
     return communityClient
   }
