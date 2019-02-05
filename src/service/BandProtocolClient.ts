@@ -30,16 +30,20 @@ export default class BandProtocolClient extends BaseClient {
 
   async getBand(): Promise<BandInfo> {
     const { band } = await this.getRequest('/dapps')
-    return { ...band, price: 10000, last24Hrs: 1.85 }
+    return {
+      ...band,
+      price: parseFloat(band.price),
+      last24Hrs: parseFloat(band.last24Hrs),
+    }
   }
 
   async getDApps(): Promise<DappInfo[]> {
     const { dapps } = await this.getRequest('/dapps')
-    return dapps.map((e: DappInfo) => ({
+    return dapps.map((e: any) => ({
       ...e,
-      marketCap: new BN('5000000000000000000000000'),
-      price: new BN('2450000000000000000'),
-      last24Hrs: 2.05,
+      marketCap: parseFloat(e.marketCap),
+      price: parseFloat(e.price),
+      last24Hrs: parseFloat(e.last24Hrs),
     }))
   }
 

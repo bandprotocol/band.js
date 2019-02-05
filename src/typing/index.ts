@@ -39,7 +39,7 @@ export interface DappInfo {
   description: string
   website: string
   address: Address
-  marketCap: BN
-  price: BN
+  marketCap: number
+  price: number
   last24Hrs: number
 }
