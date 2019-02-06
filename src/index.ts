@@ -1,3 +1,3 @@
-import BandProtocolClient from './service/BandProtocolClient'
+import BandProtocolClient from './services/BandProtocolClient'
 
 export default BandProtocolClient
