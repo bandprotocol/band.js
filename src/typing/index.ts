@@ -21,6 +21,14 @@ export interface OrderHistory {
 }
 
 /**
+ * This is interface of object for getPriceHistory function.
+ */
+export interface PriceHistory {
+  time: string
+  price: number
+}
+
+/**
  * alias
  */
 export type Address = string

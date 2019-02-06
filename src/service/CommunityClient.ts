@@ -2,7 +2,7 @@ import _ from 'lodash'
 import Web3 from 'web3'
 import BN from 'bn.js'
 import BaseClient from './BaseClient'
-import { OrderHistory, Address, Equation } from '../typing/index'
+import { OrderHistory, Address, Equation, PriceHistory } from '../typing/index'
 
 export default class CommunityClient extends BaseClient {
   private coreAddress?: Address
@@ -40,6 +40,14 @@ export default class CommunityClient extends BaseClient {
       ...e,
       value: new BN(e.value),
       price: new BN(e.price),
+    }))
+  }
+
+  async getPriceHistory(args: { limit?: number }): Promise<PriceHistory[]> {
+    const result: any[] = await this.getRequestDApps('/price-history', args)
+    return result.map((e: any) => ({
+      time: e.time,
+      price: parseFloat(e.price),
     }))
   }
 

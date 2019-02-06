@@ -46,66 +46,67 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
   // console.log(bandClient)
   if (bandClient !== undefined) {
     // console.log(config)
-    const web3: Web3 = new Web3(provider)
+    // const web3: Web3 = new Web3(provider)
     // console.log(web3)
     // console.log(bandClient)
-    console.log(await bandClient.getNetworkType())
-    const accountAddress = (await web3.eth.getAccounts())[1]
-    console.log(accountAddress)
-    // console.log(await bandClient.getBand())
-    // console.log(await bandClient.getDApps())
-    await web3.eth.personal.unlockAccount(
-      accountAddress,
-      config.accountPassword,
-      500,
-    )
-    const x: any = await bandClient.deployCommunity(
-      'NewBandApp',
-      'NBA',
-      'https://NewBandApp.com/logo.png',
-      'The Next Band Protocol dApp',
-      'https://NewBandApp.com',
-      'Band Protocol',
-      'x * ((2* x / 2000000000000000000000000000000000000) ^ 2) * curve / 1000000000000',
-      '0x83c8D85227639b2b2141e7a7eed2433C43839D11',
-      [
-        'core:admin_contract',
-        'core:reward_period',
-        'core:reward_edit_period',
-        'params:commit_time',
-        'params:reveal_time',
-        'params:support_required_pct',
-        'params:min_participation_pct',
-        'admin:min_deposit',
-        'admin:apply_stage_length',
-        'admin:support_required_pct',
-        'admin:min_participation_pct',
-        'admin:commit_time',
-        'admin:reveal_time',
-        'admin:reward_percentage',
-      ],
-      [
-        '732867085902066557983618878559109073626010542366',
-        '120',
-        '120',
-        '60',
-        '60',
-        '70',
-        '10',
-        '100',
-        '60',
-        '50',
-        '10',
-        '60',
-        '60',
-        '50',
-      ],
-      '(x^2/2000000000000000000000000000000000000)^2',
-    )
-    console.log(x)
-    // const XCHClient = await bandClient.at(
-    //   '0x87f8a5070ea639912639256f08db05dbf8b7cf47',
+    // console.log(await bandClient.getNetworkType())
+    // const accountAddress = (await web3.eth.getAccounts())[1]
+    // console.log(accountAddress)
+    // // console.log(await bandClient.getBand())
+    // // console.log(await bandClient.getDApps())
+    // await web3.eth.personal.unlockAccount(
+    //   accountAddress,
+    //   config.accountPassword,
+    //   500,
     // )
+    // const x: any = await bandClient.deployCommunity(
+    //   'NewBandApp',
+    //   'NBA',
+    //   'https://NewBandApp.com/logo.png',
+    //   'The Next Band Protocol dApp',
+    //   'https://NewBandApp.com',
+    //   'Band Protocol',
+    //   'x * ((2* x / 2000000000000000000000000000000000000) ^ 2) * curve / 1000000000000',
+    //   '0x83c8D85227639b2b2141e7a7eed2433C43839D11',
+    //   [
+    //     'core:admin_contract',
+    //     'core:reward_period',
+    //     'core:reward_edit_period',
+    //     'params:commit_time',
+    //     'params:reveal_time',
+    //     'params:support_required_pct',
+    //     'params:min_participation_pct',
+    //     'admin:min_deposit',
+    //     'admin:apply_stage_length',
+    //     'admin:support_required_pct',
+    //     'admin:min_participation_pct',
+    //     'admin:commit_time',
+    //     'admin:reveal_time',
+    //     'admin:reward_percentage',
+    //   ],
+    //   [
+    //     '732867085902066557983618878559109073626010542366',
+    //     '120',
+    //     '120',
+    //     '60',
+    //     '60',
+    //     '70',
+    //     '10',
+    //     '100',
+    //     '60',
+    //     '50',
+    //     '10',
+    //     '60',
+    //     '60',
+    //     '50',
+    //   ],
+    //   '(x^2/2000000000000000000000000000000000000)^2',
+    // )
+    // console.log(x)
+    const XCHClient = await bandClient.at(
+      '0x109f1c6F1Fe966858c916a884088b5EC5DC58164',
+    )
+    console.log(await XCHClient.getPriceHistory({}))
     // await XCHClient.reportDetail({
     //   name: 'NewBandApp',
     //   symbol: 'NBA',
