@@ -2,7 +2,7 @@ import BandProtocolClient from '../src'
 // import * as Seed from './Seed.json'
 import config from './config-private'
 import Web3 from 'web3'
-import BN from 'bn.js'
+// import BN from 'bn.js'
 
 const ipc = config.gethConnection + 'geth.ipc'
 const provider = new Web3.providers.IpcProvider(ipc, require('net'))
@@ -50,7 +50,7 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
     // console.log(web3)
     // console.log(bandClient)
     // console.log(await bandClient.getNetworkType())
-    const accountAddress = (await web3.eth.getAccounts())[0]
+    const accountAddress = (await web3.eth.getAccounts())[1]
     console.log(accountAddress)
     // // console.log(await bandClient.getBand())
     // // console.log(await bandClient.getDApps())
@@ -104,8 +104,14 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
     // )
     // console.log(x)
     const XCHClient = await bandClient.at(
-      '0x02Fd3230a31a548F91a0196Cc2c8D8A8DEff7423',
+      '0x17252C92FbF7a1Cc00fFf528B76021BD334aa802',
     )
+
+    console.log('Before get rewards')
+
+    console.log(await XCHClient.getRewards())
+
+    console.log(await XCHClient.createClaimRewardTransaction(1))
     // console.log(await XCHClient.getPriceHistory({}))
     // await XCHClient.reportDetail({
     //   name: 'NewBandApp',
@@ -169,23 +175,23 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
     // }, 121000)
 
     /////////////////Params Test///////////////////
-    const tx = await XCHClient.createProposalTransaction(
-      ['params:reveal_time', 'params:support_required_pct'],
-      ['80', new BN('50')],
-    )
-    tx.send().on('receipt', receipt => console.log('1', receipt))
+    //   const tx = await XCHClient.createProposalTransaction(
+    //     ['params:reveal_time', 'params:support_required_pct'],
+    //     ['80', new BN('50')],
+    //   )
+    //   tx.send().on('receipt', receipt => console.log('1', receipt))
 
-    const tx2 = await XCHClient.createVoteProposalTransaction(
-      7,
-      new BN('20000000000000000000'),
-      '0',
-    )
-    tx2.send().on('receipt', receipt => console.log('2', receipt))
+    //   const tx2 = await XCHClient.createVoteProposalTransaction(
+    //     7,
+    //     new BN('20000000000000000000'),
+    //     '0',
+    //   )
+    //   tx2.send().on('receipt', receipt => console.log('2', receipt))
 
-    console.log(await XCHClient.getParameters())
-    const proposals = await XCHClient.getProposals()
-    console.log(proposals)
-    console.log(proposals[2].changes)
-    console.log(await XCHClient.getVoteResultProposals())
+    //   console.log(await XCHClient.getParameters())
+    //   const proposals = await XCHClient.getProposals()
+    //   console.log(proposals)
+    //   console.log(proposals[2].changes)
+    //   console.log(await XCHClient.getVoteResultProposals())
   }
 })()

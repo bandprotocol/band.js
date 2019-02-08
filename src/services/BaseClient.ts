@@ -22,6 +22,10 @@ export default class BaseClient {
     return (await this.web3.eth.getAccounts())[0]
   }
 
+  protected isLogin(): boolean {
+    return this.web3 !== undefined
+  }
+
   protected async createTransaction(to: Address, data: string) {
     const from = await this.getAccount()
     return {

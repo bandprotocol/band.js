@@ -10,6 +10,7 @@ import {
   Parameter,
   Proposal,
   VoteResult,
+  RewardDetail,
 } from '../typing/index'
 
 export default class CommunityClient extends BaseClient {
@@ -107,7 +108,7 @@ export default class CommunityClient extends BaseClient {
       : priceLimit
     const { to: tokenAddress, data } = await this.postRequestDApps('/buy', {
       value: amountString,
-      price_limit: priceLimitString,
+      priceLimit: priceLimitString,
     })
     return this.createTransaction(tokenAddress, data)
   }
@@ -119,13 +120,13 @@ export default class CommunityClient extends BaseClient {
       : priceLimit
     const { to: tokenAddress, data } = await this.postRequestDApps('/sell', {
       value: amountString,
-      price_limit: priceLimitString,
+      priceLimit: priceLimitString,
     })
     return this.createTransaction(tokenAddress, data)
   }
 
   async createNewRewardTransaction(keys: Address[], values: number[]) {
-    const { root_hash: rootHash } = await this.postRequestMerkle('', {
+    const { rootHash } = await this.postRequestMerkle('', {
       keys,
       values,
     })
@@ -133,49 +134,58 @@ export default class CommunityClient extends BaseClient {
     const { to: tokenAddress, data } = await this.postRequestDApps(
       '/add-reward',
       {
-        root_hash: rootHash,
-        total_portion: _.sum(values),
+        rootHash: rootHash,
+        totalPortion: _.sum(values),
       },
     )
 
     return this.createTransaction(tokenAddress, data)
   }
 
-  async getRewardDetail(
-    rewardID: number,
-  ): Promise<{ rootHash: string; totalReward: number; claimed: number }> {
-    const {
-      root_hash: rootHash,
-      total_reward: totalReward,
-      claimed,
-    } = await this.getRequestDApps(`/reward/${rewardID}`)
-
-    return { rootHash, totalReward, claimed }
-  }
-
-  async getReward(rewardID: number): Promise<number> {
-    const { rootHash } = await this.getRewardDetail(rewardID)
-    const result = await this.getRequestMerkle(`/${rootHash}`, {
-      key: await this.getAccount(),
-    })
-    if (result[0].value === undefined) return 0
-    return result[0].value
+  async getRewardDetail(rewardID: number): Promise<RewardDetail> {
+    const rewards = await this.getRequestDApps(`/rewards`)
+    return rewards.filter((reward: any) => reward.rewardID === rewardID)[0]
   }
 
   async createClaimRewardTransaction(rewardID: number) {
     const { rootHash } = await this.getRewardDetail(rewardID)
     const account = await this.getAccount()
     const proof = await this.getRequestMerkle(`/${rootHash}/proof/${account}`)
-    const rewardPortion = await this.getReward(rewardID)
-    const { to: tokenAddress, data } = await this.postRequestDApps(
-      `/reward/${rewardID}`,
-      {
-        beneficiary: account,
-        reward_portion: rewardPortion,
-        proof: proof,
-      },
-    )
+    const kvs = await this.getRequestMerkle(`/${rootHash}`, {
+      key: account,
+    })
+    if (kvs.length === 0) {
+      this.throw('Reward not found')
+    }
+    const { to: tokenAddress, data } = await this.postRequestDApps(`/rewards`, {
+      rewardID,
+      beneficiary: account,
+      rewardPortion: kvs[0].value,
+      proof,
+    })
     return this.createTransaction(tokenAddress, data)
+  }
+
+  async getRewards(): Promise<RewardDetail[]> {
+    const rewards: RewardDetail[] = await this.getRequestDApps(`/rewards`)
+    if (!this.isLogin()) return rewards
+    const user = await this.getAccount()
+    for (const reward of rewards) {
+      const claim = await this.getRequestDApps(
+        `/rewards/${reward.rewardID}/claim/${user}`,
+      )
+      if (claim.claimed) {
+        reward.claimed = true
+        reward.amount = claim.amount
+      } else {
+        const kvs = await this.getRequestMerkle(`/${reward.rootHash}`, {
+          key: user,
+        })
+        reward.claimed = false
+        reward.amount = kvs.length === 0 ? 0 : kvs[0].value
+      }
+    }
+    return rewards
   }
 
   async getParameters(): Promise<Parameter[]> {

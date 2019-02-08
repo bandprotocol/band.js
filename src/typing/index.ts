@@ -13,11 +13,11 @@ export interface JsonResponse {
  */
 export interface OrderHistory {
   user: Address
-  order_type: string
+  orderType: string
   value: BN
   price: BN
-  block_time: string
-  tx_hash: string
+  blockTime: string
+  txHash: string
 }
 
 /**
@@ -69,4 +69,13 @@ export interface VoteResult {
   proposalID: number
   yesVote: BN
   noVote: BN
+}
+
+export interface RewardDetail {
+  rewardID: number
+  rootHash: string
+  totalReward: BN
+  totalClaims: number
+  claimed?: boolean
+  amount?: BN
 }
