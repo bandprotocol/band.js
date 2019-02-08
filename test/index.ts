@@ -2,7 +2,7 @@ import BandProtocolClient from '../src'
 // import * as Seed from './Seed.json'
 import config from './config-private'
 import Web3 from 'web3'
-// import BN from 'bn.js'
+import BN from 'bn.js'
 
 const ipc = config.gethConnection + 'geth.ipc'
 const provider = new Web3.providers.IpcProvider(ipc, require('net'))
@@ -46,19 +46,19 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
   // console.log(bandClient)
   if (bandClient !== undefined) {
     // console.log(config)
-    // const web3: Web3 = new Web3(provider)
+    const web3: Web3 = new Web3(provider)
     // console.log(web3)
     // console.log(bandClient)
     // console.log(await bandClient.getNetworkType())
-    // const accountAddress = (await web3.eth.getAccounts())[1]
-    // console.log(accountAddress)
+    const accountAddress = (await web3.eth.getAccounts())[0]
+    console.log(accountAddress)
     // // console.log(await bandClient.getBand())
     // // console.log(await bandClient.getDApps())
-    // await web3.eth.personal.unlockAccount(
-    //   accountAddress,
-    //   config.accountPassword,
-    //   500,
-    // )
+    await web3.eth.personal.unlockAccount(
+      accountAddress,
+      config.accountPassword,
+      500,
+    )
     // const x: any = await bandClient.deployCommunity(
     //   'NewBandApp',
     //   'NBA',
@@ -104,9 +104,9 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
     // )
     // console.log(x)
     const XCHClient = await bandClient.at(
-      '0x109f1c6F1Fe966858c916a884088b5EC5DC58164',
+      '0x02Fd3230a31a548F91a0196Cc2c8D8A8DEff7423',
     )
-    console.log(await XCHClient.getPriceHistory({}))
+    // console.log(await XCHClient.getPriceHistory({}))
     // await XCHClient.reportDetail({
     //   name: 'NewBandApp',
     //   symbol: 'NBA',
@@ -138,6 +138,8 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
     //     type: 'buy',
     //   }),
     // )
+
+    // /////////////Reward Test///////////////
     // transfer XCH
     // console.log(
     //   await XCHClient.transfer(
@@ -165,5 +167,25 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
     //   console.log(`Number of claimed: ${claimed} Total Reward: ${totalReward}`)
     //   console.log('Owner Balance:', (await bandClient.getBalance()).toString())
     // }, 121000)
+
+    /////////////////Params Test///////////////////
+    const tx = await XCHClient.createProposalTransaction(
+      ['params:reveal_time', 'params:support_required_pct'],
+      ['80', new BN('50')],
+    )
+    tx.send().on('receipt', receipt => console.log('1', receipt))
+
+    const tx2 = await XCHClient.createVoteProposalTransaction(
+      7,
+      new BN('20000000000000000000'),
+      '0',
+    )
+    tx2.send().on('receipt', receipt => console.log('2', receipt))
+
+    console.log(await XCHClient.getParameters())
+    const proposals = await XCHClient.getProposals()
+    console.log(proposals)
+    console.log(proposals[2].changes)
+    console.log(await XCHClient.getVoteResultProposals())
   }
 })()

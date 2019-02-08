@@ -51,3 +51,22 @@ export interface DappInfo {
   price: number
   last24Hrs: number
 }
+
+export interface Parameter {
+  key: string
+  value: BN
+}
+
+export interface Proposal {
+  proposalID: number
+  proposer: Address
+  changes: Parameter[]
+  yesVote: BN
+  noVote: BN
+}
+
+export interface VoteResult {
+  proposalID: number
+  yesVote: BN
+  noVote: BN
+}
