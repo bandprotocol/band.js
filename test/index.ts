@@ -111,7 +111,7 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
 
     console.log(await XCHClient.getRewards())
 
-    console.log(await XCHClient.createClaimRewardTransaction(1))
+    // console.log(await XCHClient.createClaimRewardTransaction(1))
     // console.log(await XCHClient.getPriceHistory({}))
     // await XCHClient.reportDetail({
     //   name: 'NewBandApp',

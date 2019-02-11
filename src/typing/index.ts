@@ -76,6 +76,7 @@ export interface RewardDetail {
   rootHash: string
   totalReward: BN
   totalClaims: number
+  totalPortion: BN
   claimed?: boolean
   amount?: BN
 }

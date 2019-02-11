@@ -167,7 +167,12 @@ export default class CommunityClient extends BaseClient {
   }
 
   async getRewards(): Promise<RewardDetail[]> {
-    const rewards: RewardDetail[] = await this.getRequestDApps(`/rewards`)
+    const rawRewards: RewardDetail[] = await this.getRequestDApps(`/rewards`)
+    const rewards = rawRewards.map((reward: RewardDetail) => ({
+      ...reward,
+      totalReward: new BN(reward.totalReward),
+      totalPortion: new BN(reward.totalPortion),
+    }))
     if (!this.isLogin()) return rewards
     const user = await this.getAccount()
     for (const reward of rewards) {
@@ -176,13 +181,18 @@ export default class CommunityClient extends BaseClient {
       )
       if (claim.claimed) {
         reward.claimed = true
-        reward.amount = claim.amount
+        reward.amount = new BN(claim.amount)
       } else {
         const kvs = await this.getRequestMerkle(`/${reward.rootHash}`, {
           key: user,
         })
         reward.claimed = false
-        reward.amount = kvs.length === 0 ? 0 : kvs[0].value
+        reward.amount =
+          kvs.length === 0
+            ? new BN(0)
+            : new BN(kvs[0].value)
+                .mul(reward.totalReward)
+                .div(reward.totalPortion)
       }
     }
     return rewards
