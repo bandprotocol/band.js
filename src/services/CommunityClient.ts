@@ -125,7 +125,14 @@ export default class CommunityClient extends BaseClient {
     return this.createTransaction(tokenAddress, data)
   }
 
-  async createNewRewardTransaction(keys: Address[], values: number[]) {
+  async createNewRewardTransaction(
+    keys: Address[],
+    values: number[],
+    imageLink: string,
+    detailLink: string,
+    header: string,
+    period: string,
+  ) {
     const { rootHash } = await this.postRequestMerkle('', {
       keys,
       values,
@@ -139,7 +146,41 @@ export default class CommunityClient extends BaseClient {
       },
     )
 
-    return this.createTransaction(tokenAddress, data)
+    const { logs } = await (await this.createTransaction(
+      tokenAddress,
+      data,
+    )).send()
+
+    if (!logs) return
+    const rewardID = parseInt(logs[0].topics[1] as any) // TODO: Figure out why topics[1] can be string[]
+
+    await this.reportRewardDetail({
+      imageLink,
+      detailLink,
+      header,
+      period,
+      rewardID,
+    })
+  }
+  async reportRewardDetail({
+    imageLink,
+    detailLink,
+    header,
+    period,
+    rewardID,
+  }: {
+    imageLink: string
+    detailLink: string
+    header: string
+    period: string
+    rewardID: number
+  }) {
+    await this.postRequestDApps(`/rewards/${rewardID}/detail`, {
+      imageLink,
+      detailLink,
+      header,
+      period,
+    })
   }
 
   async getRewardDetail(rewardID: number): Promise<RewardDetail> {

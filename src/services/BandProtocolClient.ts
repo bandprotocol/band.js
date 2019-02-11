@@ -82,6 +82,10 @@ export default class BandProtocolClient extends BaseClient {
     })
 
     const { logs } = await (await this.createTransaction(to, data)).send()
+    // const { logs } = await (await this.createTransaction(
+    //   to,
+    //   data,
+    // )).sendAndWait6Confirmations()
     const chunk = logs
       ? logs[logs.length - 1].data
       : this.throw("Transaction's logs is invalid.")

@@ -77,6 +77,10 @@ export interface RewardDetail {
   totalReward: BN
   totalClaims: number
   totalPortion: BN
+  imageLink: string
+  detailLink: string
+  header: string
+  period: string
   claimed?: boolean
   amount?: BN
 }

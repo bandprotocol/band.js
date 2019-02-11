@@ -2,7 +2,7 @@ import BandProtocolClient from '../src'
 // import * as Seed from './Seed.json'
 import config from './config-private'
 import Web3 from 'web3'
-// import BN from 'bn.js'
+import BN from 'bn.js'
 
 const ipc = config.gethConnection + 'geth.ipc'
 const provider = new Web3.providers.IpcProvider(ipc, require('net'))
@@ -54,11 +54,11 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
     console.log(accountAddress)
     // // console.log(await bandClient.getBand())
     // // console.log(await bandClient.getDApps())
-    await web3.eth.personal.unlockAccount(
-      accountAddress,
-      config.accountPassword,
-      500,
-    )
+    // await web3.eth.personal.unlockAccount(
+    //   accountAddress,
+    //   config.accountPassword,
+    //   500,
+    // )
     // const x: any = await bandClient.deployCommunity(
     //   'NewBandApp',
     //   'NBA',
@@ -107,9 +107,32 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
       '0x17252C92FbF7a1Cc00fFf528B76021BD334aa802',
     )
 
+    // const XCHClient = await bandClient.at(
+    //   '0x02Fd3230a31a548F91a0196Cc2c8D8A8DEff7423',
+    // )
+
     console.log('Before get rewards')
 
-    console.log(await XCHClient.getRewards())
+    await (await XCHClient.createTransferTransaction(
+      '0x17252C92FbF7a1Cc00fFf528B76021BD334aa802',
+      new BN('1000000000000000000'),
+    )).send()
+    // console.log(await XCHClient.getRewards())
+    await XCHClient.createNewRewardTransaction(
+      ['0x85109F11A7E1385ee826FbF5dA97bB97dba0D76f'],
+      [30],
+      'https://imgur.com/6C4DIsJ.png',
+      'https://bandprotocol.com/',
+      '1-1',
+      'Fourth Reward',
+    )
+    // await XCHClient.reportRewardDetail({
+    //   imageLink: 'https://imgur.com/6C4DIsJ.png',
+    //   detailLink: 'https://bandprotocol.com/',
+    //   period: '1-1',
+    //   header: 'Second reward',
+    //   rewardID: 2,
+    // })
 
     // console.log(await XCHClient.createClaimRewardTransaction(1))
     // console.log(await XCHClient.getPriceHistory({}))

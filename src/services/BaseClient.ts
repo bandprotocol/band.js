@@ -1,6 +1,7 @@
 import axios from 'axios'
 import Web3 from 'web3'
 import { Address, JsonResponse } from '../typing'
+import { TransactionReceipt } from 'web3-core/types'
 
 /**
  * This is a BaseClient Class
@@ -35,6 +36,24 @@ export default class BaseClient {
           from,
           to,
           data,
+        })
+      },
+      sendAndWait6Confirmations: () => {
+        if (this.web3 === undefined) return this.throw('Required provider.')
+        const promi = this.web3.eth.sendTransaction({
+          from,
+          to,
+          data,
+        })
+
+        return new Promise<TransactionReceipt>((resolve, reject) => {
+          promi
+            .on('confirmation', (confNumber, receipt) => {
+              if (confNumber === 6) {
+                return resolve(receipt)
+              }
+            })
+            .on('error', error => reject(error))
         })
       },
     }
