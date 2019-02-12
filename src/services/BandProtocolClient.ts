@@ -51,8 +51,7 @@ export default class BandProtocolClient extends BaseClient {
     if (this.web3 === undefined) {
       return this.throw('Required provider.')
     }
-    // TODO: make it offcial
-    const enable = (this.web3.currentProvider as any).enable
+    const enable = (this.web3.eth as any).requestAccounts
     if (enable) {
       enable()
     }
