@@ -2,6 +2,7 @@ import _ from 'lodash'
 import Web3 from 'web3'
 import BN from 'bn.js'
 import BaseClient from './BaseClient'
+import Utils from './Utils'
 import {
   OrderHistory,
   Address,
@@ -90,15 +91,15 @@ export default class CommunityClient extends BaseClient {
 
   async createTransferTransaction(to: Address, value: string | BN) {
     const valueString = BN.isBN(value) ? value.toString() : value
-    const { to: tokenAddress, data } = await this.postRequestDApps(
+    const { to: tokenAddress, data, nonce } = await this.postRequestDApps(
       '/transfer',
       {
+        sender: await this.getAccount(),
         to: to,
         value: valueString,
       },
     )
-
-    return this.createTransaction(tokenAddress, data)
+    return this.createTransaction(tokenAddress, data, true, nonce)
   }
 
   async createBuyTransaction(amount: string | BN, priceLimit: string | BN) {
@@ -106,11 +107,15 @@ export default class CommunityClient extends BaseClient {
     const priceLimitString = BN.isBN(priceLimit)
       ? priceLimit.toString()
       : priceLimit
-    const { to: tokenAddress, data } = await this.postRequestDApps('/buy', {
-      value: amountString,
-      priceLimit: priceLimitString,
-    })
-    return this.createTransaction(tokenAddress, data)
+    const { to: tokenAddress, data, nonce } = await this.postRequestDApps(
+      '/buy',
+      {
+        sender: await this.getAccount(),
+        value: amountString,
+        priceLimit: priceLimitString,
+      },
+    )
+    return this.createTransaction(tokenAddress, data, true, nonce)
   }
 
   async createSellTransaction(amount: string | BN, priceLimit: string | BN) {
@@ -118,11 +123,15 @@ export default class CommunityClient extends BaseClient {
     const priceLimitString = BN.isBN(priceLimit)
       ? priceLimit.toString()
       : priceLimit
-    const { to: tokenAddress, data } = await this.postRequestDApps('/sell', {
-      value: amountString,
-      priceLimit: priceLimitString,
-    })
-    return this.createTransaction(tokenAddress, data)
+    const { to: tokenAddress, data, nonce } = await this.postRequestDApps(
+      '/sell',
+      {
+        sender: await this.getAccount(),
+        value: amountString,
+        priceLimit: priceLimitString,
+      },
+    )
+    return this.createTransaction(tokenAddress, data, true, nonce)
   }
 
   async createNewRewardTransaction(
@@ -145,12 +154,8 @@ export default class CommunityClient extends BaseClient {
         totalPortion: _.sum(values),
       },
     )
-
-    const { logs } = await (await this.createTransaction(
-      tokenAddress,
-      data,
-    )).send()
-
+    const tx = await this.createTransaction(tokenAddress, data, false)
+    const { logs } = await tx.send()
     if (!logs) return
     const rewardID = parseInt(logs[0].topics[1] as any) // TODO: Figure out why topics[1] can be string[]
 
@@ -162,6 +167,7 @@ export default class CommunityClient extends BaseClient {
       rewardID,
     })
   }
+
   async reportRewardDetail({
     imageLink,
     detailLink,
@@ -183,11 +189,6 @@ export default class CommunityClient extends BaseClient {
     })
   }
 
-  async getRewardDetail(rewardID: number): Promise<RewardDetail> {
-    const rewards = await this.getRequestDApps(`/rewards`)
-    return rewards.filter((reward: any) => reward.rewardID === rewardID)[0]
-  }
-
   async createClaimRewardTransaction(rewardID: number) {
     const { rootHash } = await this.getRewardDetail(rewardID)
     const account = await this.getAccount()
@@ -196,7 +197,7 @@ export default class CommunityClient extends BaseClient {
       key: account,
     })
     if (kvs.length === 0) {
-      this.throw('Reward not found')
+      Utils.throw('Reward not found')
     }
     const { to: tokenAddress, data } = await this.postRequestDApps(`/rewards`, {
       rewardID,
@@ -204,7 +205,12 @@ export default class CommunityClient extends BaseClient {
       rewardPortion: kvs[0].value,
       proof,
     })
-    return this.createTransaction(tokenAddress, data)
+    return this.createTransaction(tokenAddress, data, false)
+  }
+
+  async getRewardDetail(rewardID: number): Promise<RewardDetail> {
+    const rewards = await this.getRequestDApps(`/rewards`)
+    return rewards.filter((reward: any) => reward.rewardID === rewardID)[0]
   }
 
   async getRewards(): Promise<RewardDetail[]> {
@@ -271,14 +277,15 @@ export default class CommunityClient extends BaseClient {
   }
 
   async createProposalTransaction(keys: string[], values: (string | BN)[]) {
-    const { to: tokenAddress, data } = await this.postRequestDApps(
+    const { to: tokenAddress, data, nonce } = await this.postRequestDApps(
       '/proposals',
       {
+        sender: await this.getAccount(),
         keys,
         values: values.map((e: string | BN) => (BN.isBN(e) ? e.toString() : e)),
       },
     )
-    return this.createTransaction(tokenAddress, data)
+    return this.createTransaction(tokenAddress, data, true, nonce)
   }
 
   async createVoteProposalTransaction(
@@ -286,26 +293,27 @@ export default class CommunityClient extends BaseClient {
     yesVote: string | BN,
     noVote: string | BN,
   ) {
-    const { to: tokenAddress, data } = await this.postRequestDApps(
+    const { to: tokenAddress, data, nonce } = await this.postRequestDApps(
       `/proposals/${proposalID}/vote`,
       {
+        sender: await this.getAccount(),
         yesVote: BN.isBN(yesVote) ? yesVote.toString() : yesVote,
         noVote: BN.isBN(noVote) ? noVote.toString() : noVote,
       },
     )
-    return this.createTransaction(tokenAddress, data)
+    return this.createTransaction(tokenAddress, data, true, nonce)
   }
 
   private async getRequestDApps(path: string, params?: any): Promise<any> {
-    return await this.getRequest(`/dapps/${this.coreAddress}${path}`, params)
+    return await Utils.getRequest(`/dapps/${this.coreAddress}${path}`, params)
   }
   private async postRequestDApps(path: string, data: any): Promise<any> {
-    return await this.postRequest(`/dapps/${this.coreAddress}${path}`, data)
+    return await Utils.postRequest(`/dapps/${this.coreAddress}${path}`, data)
   }
   private async getRequestMerkle(path: string, params?: any): Promise<any> {
-    return await this.getRequest(`/merkle${path}`, params)
+    return await Utils.getRequest(`/merkle${path}`, params)
   }
   private async postRequestMerkle(path: string, data: any): Promise<any> {
-    return await this.postRequest(`/merkle${path}`, data)
+    return await Utils.postRequest(`/merkle${path}`, data)
   }
 }

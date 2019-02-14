@@ -3,6 +3,7 @@ import Web3 from 'web3'
 // import { Provider } from 'web3/providers'  TODO: bring back provider type
 import BaseClient from './BaseClient'
 import CommunityClient from './CommunityClient'
+import Utils from './Utils'
 import { Address, Equation, BandInfo, DappInfo } from '../typing/index'
 
 /**
@@ -29,7 +30,7 @@ export default class BandProtocolClient extends BaseClient {
   }
 
   async getBand(): Promise<BandInfo> {
-    const { band } = await this.getRequest('/dapps')
+    const { band } = await Utils.getRequest('/dapps')
     return {
       ...band,
       price: parseFloat(band.price),
@@ -38,7 +39,7 @@ export default class BandProtocolClient extends BaseClient {
   }
 
   async getDApps(): Promise<DappInfo[]> {
-    const { dapps } = await this.getRequest('/dapps')
+    const { dapps } = await Utils.getRequest('/dapps')
     return dapps.map((e: any) => ({
       ...e,
       marketCap: parseFloat(e.marketCap),
@@ -47,9 +48,10 @@ export default class BandProtocolClient extends BaseClient {
     }))
   }
 
+  // TODO: recheck again
   async enableEthereum() {
     if (this.web3 === undefined) {
-      return this.throw('Required provider.')
+      return Utils.throw('Required provider.')
     }
     const enable = (this.web3.eth as any).requestAccounts
     if (enable) {
@@ -79,15 +81,15 @@ export default class BandProtocolClient extends BaseClient {
       values,
       collateralEquation,
     })
-
-    const { logs } = await (await this.createTransaction(to, data)).send()
+    const tx = await this.createTransaction(to, data, false)
+    const { logs } = await tx.send()
     // const { logs } = await (await this.createTransaction(
     //   to,
     //   data,
     // )).sendAndWait6Confirmations()
     const chunk = logs
       ? logs[logs.length - 1].data
-      : this.throw("Transaction's logs is invalid.")
+      : Utils.throw("Transaction's logs is invalid.")
     const coreAddress = '0x' + chunk.slice(218, 258)
     const communityClient = await this.at(coreAddress)
     await communityClient.reportDetail({
@@ -108,13 +110,13 @@ export default class BandProtocolClient extends BaseClient {
    * @returns An instance of CommunityClient.
    */
   async at(coreAddress: Address) {
-    const { dapps } = await this.getRequest('/dapps')
+    const { dapps } = await Utils.getRequest('/dapps')
     const filterDapps = dapps.filter(
       (element: any) =>
         element.address.toLowerCase() === coreAddress.toLowerCase(),
     )
     if (filterDapps.length === 0) {
-      return this.throw("This dapp contract's address is invalid.")
+      return Utils.throw("This dapp contract's address is invalid.")
     }
     return new CommunityClient(this.web3, filterDapps[0].address)
   }
@@ -126,7 +128,7 @@ export default class BandProtocolClient extends BaseClient {
    */
   async getNetworkType(): Promise<string> {
     if (this.web3 === undefined) {
-      return this.throw('Required provider.')
+      return Utils.throw('Required provider.')
     }
     const networkId = await this.web3.eth.net.getId()
     switch (networkId) {
@@ -162,19 +164,22 @@ export default class BandProtocolClient extends BaseClient {
    */
   async createTransferTransaction(to: Address, value: string | BN) {
     const valueString = BN.isBN(value) ? value.toString() : value
-    const { to: bandAddress, data } = await this.postRequestBand('/transfer', {
-      to: to,
-      value: valueString,
-    })
-
-    return this.createTransaction(bandAddress, data)
+    const { to: bandAddress, data, nonce } = await this.postRequestBand(
+      '/transfer',
+      {
+        sender: await this.getAccount(),
+        to: to,
+        value: valueString,
+      },
+    )
+    return this.createTransaction(bandAddress, data, true, nonce)
   }
 
   private async getRequestBand(path: string): Promise<any> {
-    return await this.getRequest(`/band${path}`)
+    return await Utils.getRequest(`/band${path}`)
   }
 
   private async postRequestBand(path: string, data: any): Promise<any> {
-    return await this.postRequest(`/band${path}`, data)
+    return await Utils.postRequest(`/band${path}`, data)
   }
 }

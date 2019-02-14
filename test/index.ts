@@ -12,29 +12,25 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
   //   const bandClient = await BandProtocolClient.make({
   //     provider: provider,
   //   })
-  //   const x = await bandClient.getNetworkType()
-  //   console.log('Network: ', x)
-
-  //   const y = await bandClient.getBalance()
-  //   console.log('Owner Balance:', y)
+  //   // const x = await bandClient.getNetworkType()
+  //   // console.log('Network: ', x)
+  //   // const y = await bandClient.getBalance()
+  //   // console.log('Owner Balance:', y)
   //   const web3: Web3 = new Web3(provider)
   //   const accountAddress = (await web3.eth.getAccounts())[0]
   //   console.log(accountAddress)
   //   await web3.eth.personal.unlockAccount(
   //     accountAddress,
   //     config.accountPassword,
-  //     100,
+  //     500,
   //   )
   //   if (bandClient !== undefined) {
-  //     console.log(
-  //       await bandClient.transfer(
-  //         '0x180d1eC6665f9d636905F1869C1bc98DE2e8b121',
-  //         new BN('1000000000000000000'),
-  //       ),
+  //     const tx = await bandClient.createTransferTransaction(
+  //       '0x180d1eC6665f9d636905F1869C1bc98DE2e8b121',
+  //       new BN('1000000000000000000'),
   //     )
-  //     console.log(
-  //       await bandClient.at('0x1B3DEAe804474A4254cA78EBd07a854f98bD1110'),
-  //     )
+  //     console.log('OK sendFeeles', await tx.sendFeeless())
+  //     console.log('OK send', await tx.send())
   //   }
   // })()
 
@@ -43,37 +39,36 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
   const bandClient = await BandProtocolClient.make({
     provider: provider,
   })
-  // console.log(bandClient)
   if (bandClient !== undefined) {
     // console.log(config)
     const web3: Web3 = new Web3(provider)
     // console.log(web3)
     // console.log(bandClient)
     // console.log(await bandClient.getNetworkType())
-    const accountAddress = (await web3.eth.getAccounts())[1]
+    const accountAddress = (await web3.eth.getAccounts())[0]
     console.log(accountAddress)
-    // // console.log(await bandClient.getBand())
-    // // console.log(await bandClient.getDApps())
-    // await web3.eth.personal.unlockAccount(
-    //   accountAddress,
-    //   config.accountPassword,
-    //   500,
-    // )
+    console.log((await bandClient.getBalance()).toString())
+    // console.log(await bandClient.getBand())
+    // console.log(await bandClient.getDApps())
+    await web3.eth.personal.unlockAccount(
+      accountAddress,
+      config.accountPassword,
+      500,
+    )
     // const x: any = await bandClient.deployCommunity(
-    //   'NewBandApp',
-    //   'NBA',
-    //   'https://NewBandApp.com/logo.png',
-    //   'The Next Band Protocol dApp',
+    //   'HazardApp',
+    //   'HZC',
+    //   'https://i.imgur.com/FApqk3D.jpg',
+    //   'D Day',
     //   'https://NewBandApp.com',
-    //   'Band Protocol',
+    //   'Umbrella Cooperation',
     //   'x * ((2* x / 2000000000000000000000000000000000000) ^ 2) * curve / 1000000000000',
-    //   '0x83c8D85227639b2b2141e7a7eed2433C43839D11',
+    //   '0x8fAcfD1352EBc1F8Bb49d6C557609Ac35177d046',
     //   [
     //     'core:admin_contract',
     //     'core:reward_period',
     //     'core:reward_edit_period',
-    //     'params:commit_time',
-    //     'params:reveal_time',
+    //     'params:expiration_time',
     //     'params:support_required_pct',
     //     'params:min_participation_pct',
     //     'admin:min_deposit',
@@ -85,11 +80,10 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
     //     'admin:reward_percentage',
     //   ],
     //   [
-    //     '732867085902066557983618878559109073626010542366',
+    //     '287919152008616205050887182337219248835982180233',
     //     '120',
     //     '120',
-    //     '60',
-    //     '60',
+    //     '300',
     //     '70',
     //     '10',
     //     '100',
@@ -104,59 +98,32 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
     // )
     // console.log(x)
     const XCHClient = await bandClient.at(
-      '0x17252C92FbF7a1Cc00fFf528B76021BD334aa802',
+      '0x7fD91BE45e01A3dfdA922A5B45d8CFA03207C072',
     )
+    console.log('token balance: ', (await XCHClient.getBalance()).toString())
 
-    // const XCHClient = await bandClient.at(
-    //   '0x02Fd3230a31a548F91a0196Cc2c8D8A8DEff7423',
-    // )
-
-    console.log('Before get rewards')
-
-    await (await XCHClient.createTransferTransaction(
-      '0x17252C92FbF7a1Cc00fFf528B76021BD334aa802',
-      new BN('1000000000000000000'),
-    )).send()
-    // console.log(await XCHClient.getRewards())
-    await XCHClient.createNewRewardTransaction(
-      ['0x85109F11A7E1385ee826FbF5dA97bB97dba0D76f'],
-      [30],
-      'https://imgur.com/6C4DIsJ.png',
-      'https://bandprotocol.com/',
-      '1-1',
-      'Fourth Reward',
-    )
-    // await XCHClient.reportRewardDetail({
-    //   imageLink: 'https://imgur.com/6C4DIsJ.png',
-    //   detailLink: 'https://bandprotocol.com/',
-    //   period: '1-1',
-    //   header: 'Second reward',
-    //   rewardID: 2,
-    // })
-
-    // console.log(await XCHClient.createClaimRewardTransaction(1))
-    // console.log(await XCHClient.getPriceHistory({}))
     // await XCHClient.reportDetail({
-    //   name: 'NewBandApp',
-    //   symbol: 'NBA',
-    //   logo: 'https://NewBandApp.com/logo.png',
+    //   name: 'GodApp',
+    //   symbol: 'GAC',
+    //   logo: 'https://i.imgur.com/rYPVs3s.jpg',
     //   description: 'The Next Band Protocol dApp',
     //   website: 'https://NewBandApp.com',
     //   author: 'Band Protocol',
     //   priceEquation:
     //     'x * ((2* x / 2000000000000000000000000000000000000) ^ 2) * curve / 1000000000000',
     // })
-    // console.log((await XCHClient.getBalance()).toString())
     // // buy XCH by BandToken
-    // const buyAmount = '10000000000000000000'
+    // const buyAmount = '1000000000000000000'
     // const buyPrice = await XCHClient.getBuyPrice(buyAmount)
     // console.log('BuyPrice: ', buyPrice.toString())
-    // console.log(await XCHClient.buy(buyAmount, buyPrice))
+    // const buyTx = await XCHClient.createBuyTransaction(buyAmount, buyPrice)
+    // console.log(await buyTx.send())
     // // sell XCH by BandToken
-    // const sellAmount = new BN('2000000000000000000')
+    // const sellAmount = new BN('500000000000000000')
     // const sellPrice = await XCHClient.getSellPrice(sellAmount)
     // console.log('SellPrice: ', sellPrice.toString())
-    // console.log(await XCHClient.sell(sellAmount, sellPrice))
+    // const sellTx = await XCHClient.createSellTransaction(sellAmount, sellPrice)
+    // console.log(await sellTx.sendFeeless())
     // // get balance
     // console.log('Owner Balance:', (await bandClient.getBalance()).toString())
     // // get order history
@@ -167,54 +134,51 @@ const provider = new Web3.providers.IpcProvider(ipc, require('net'))
     //     type: 'buy',
     //   }),
     // )
-
     // /////////////Reward Test///////////////
     // transfer XCH
-    // console.log(
-    //   await XCHClient.transfer(
-    //     '0x274Dc11053569DdD88BE25e3A71CfBc22944a3B0',
-    //     '1000000000000000000',
-    //   ),
+    // const transferTx = await XCHClient.createTransferTransaction(
+    //   '0x7fD91BE45e01A3dfdA922A5B45d8CFA03207C072',
+    //   '100000000000000000',
     // )
-    // // Add new reward to merkle and report new reward
-    // const rewardID = await XCHClient.sendNewReward(
-    //   [
-    //     '0xCE3E5C43bcF9BB937D50653BB830723fa477ED1E',
-    //     '0x8208940DA3bDEfE1d3e4B5Ee5d4EeBf19AAe0468',
-    //   ],
-    //   [40, 60],
+    // console.log(await transferTx.sendFeeless())
+    // console.log(await transferTx.send())
+
+    // console.log(await XCHClient.getRewards())
+    // await XCHClient.createNewRewardTransaction(
+    //   ['0x8208940DA3bDEfE1d3e4B5Ee5d4EeBf19AAe0468'],
+    //   [50],
+    //   'https://imgur.com/6C4DIsJ.png',
+    //   'https://bandprotocol.com/',
+    //   'Second Reward',
+    //   '4-4-21',
     // )
-    // console.log('rewardID', rewardID)
-    // setTimeout(async () => {
-    //   // ================HAVE TO WAITTING 2 MINUTE========================
-    //   // const rewardID = 6
-    //   console.log('reward', await XCHClient.getReward(rewardID))
-    //   // claim reward
-    //   console.log(await XCHClient.sendClaimReward(rewardID))
-    //   // get Reward Detail
-    //   const { totalReward, claimed } = await XCHClient.getRewardDetail(rewardID)
-    //   console.log(`Number of claimed: ${claimed} Total Reward: ${totalReward}`)
-    //   console.log('Owner Balance:', (await bandClient.getBalance()).toString())
-    // }, 121000)
+    // await XCHClient.reportRewardDetail({
+    //   imageLink: 'https://imgur.com/6C4DIsJ.png',
+    //   detailLink: 'https://bandprotocol.com/',
+    //   period: '1-1',
+    //   header: 'Second reward',
+    //   rewardID: 1,
+    // })
+    // const tx = await XCHClient.createClaimRewardTransaction(3)
+    // console.log(await tx.send())
 
     /////////////////Params Test///////////////////
-    //   const tx = await XCHClient.createProposalTransaction(
-    //     ['params:reveal_time', 'params:support_required_pct'],
-    //     ['80', new BN('50')],
-    //   )
-    //   tx.send().on('receipt', receipt => console.log('1', receipt))
-
-    //   const tx2 = await XCHClient.createVoteProposalTransaction(
-    //     7,
-    //     new BN('20000000000000000000'),
-    //     '0',
-    //   )
-    //   tx2.send().on('receipt', receipt => console.log('2', receipt))
-
-    //   console.log(await XCHClient.getParameters())
-    //   const proposals = await XCHClient.getProposals()
-    //   console.log(proposals)
-    //   console.log(proposals[2].changes)
-    //   console.log(await XCHClient.getVoteResultProposals())
+    // const tx = await XCHClient.createProposalTransaction(
+    //   ['params:reveal_time', 'params:support_required_pct'],
+    //   ['50', new BN('60')],
+    // )
+    // console.log(await tx.send())
+    // const tx2 = await XCHClient.createVoteProposalTransaction(
+    //   3,
+    //   new BN('100000000000000000'),
+    //   '0',
+    // )
+    // console.log(await tx2.sendFeeless())
+    // console.log(await XCHClient.getParameters())
+    // const proposals = await XCHClient.getProposals()
+    // console.log(proposals)
+    // console.log(proposals[1].changes)
+    // console.log(await XCHClient.getVoteResultProposals())
+    console.log(new BN(''))
   }
 })()
