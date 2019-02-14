@@ -26,8 +26,8 @@ export default class Transaction {
     this.nonce = nonce
   }
 
-  async send() {
-    return await this.web3.eth.sendTransaction({
+  send() {
+    return this.web3.eth.sendTransaction({
       from: this.sender,
       to: this.to,
       data: this.data,
