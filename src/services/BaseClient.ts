@@ -8,7 +8,6 @@ import Transaction from './Transaction'
  * This is a BaseClient Class
  */
 export default class BaseClient {
-  // protected static API = 'https://api.bandprotocol.com'
   protected web3?: Web3
 
   protected constructor(web3?: Web3) {

@@ -182,4 +182,8 @@ export default class BandProtocolClient extends BaseClient {
   private async postRequestBand(path: string, data: any): Promise<any> {
     return await Utils.postRequest(`/band${path}`, data)
   }
+
+  static setAPI(newAPI: string) {
+    Utils.API = newAPI
+  }
 }
