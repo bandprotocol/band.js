@@ -1,5 +1,6 @@
 import Web3 from 'web3'
 import Utils from './Utils'
+// import BN from 'bn.js'
 import { Address } from '../typing'
 import Transaction from './Transaction'
 // import { TransactionReceipt } from 'web3-core/types'
@@ -52,22 +53,4 @@ export default class BaseClient {
     // },
     //   }
   }
-
-  // protected async getRequest(path: string, params?: any): Promise<any> {
-  //   const url = BaseClient.API + path
-  //   const response = await axios.get<JsonResponse>(url, { params })
-  //   if (response.data.message !== undefined) {
-  //     return Utils.throw(response.data.message)
-  //   }
-  //   return response.data.result
-  // }
-
-  // protected async postRequest(path: string, data: any): Promise<any> {
-  //   const url = BaseClient.API + path
-  //   const response = await axios.post<JsonResponse>(url, data)
-  //   if (response.data.message !== undefined) {
-  //     return Utils.throw(response.data.message)
-  //   }
-  //   return response.data.result
-  // }
 }

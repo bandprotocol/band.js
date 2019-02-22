@@ -6,34 +6,35 @@ import BN from 'bn.js'
 
 const ipc = config.gethConnection + 'geth.ipc'
 const provider = new Web3.providers.IpcProvider(ipc, require('net'))
-BandProtocolClient.setAPI('https://api.rinkeby.bandprotocol.com')
+// BandProtocolClient.setAPI('https://api.rinkeby.bandprotocol.com')
+BandProtocolClient.setAPI('https://api-wip.rinkeby.bandprotocol.com')
 
 // Band Test
 ;(async () => {
-  const bandClient = await BandProtocolClient.make({
-    provider: provider,
-  })
+  // const bandClient = await BandProtocolClient.make({
+  //   provider: provider,
+  // })
   // const x = await bandClient.getNetworkType()
   // console.log('Network: ', x)
   // const y = await bandClient.getBalance()
   // console.log('Owner Balance:', y)
-  const web3: Web3 = new Web3(provider)
-  const accountAddress = (await web3.eth.getAccounts())[0]
-  console.log(accountAddress)
-  await web3.eth.personal.unlockAccount(
-    accountAddress,
-    config.accountPassword,
-    500,
-  )
-  if (bandClient !== undefined) {
-    // send fee and feeless
-    const tx = await bandClient.createTransferTransaction(
-      '0xCE3E5C43bcF9BB937D50653BB830723fa477ED1E',
-      new BN('1000000000000000000'), // 1 band
-    )
-    console.log('OK sendFeeles', await tx.sendFeeless())
-    // console.log('OK send', await tx.send())
-  }
+  // const web3: Web3 = new Web3(provider)
+  // const accountAddress = (await web3.eth.getAccounts())[0]
+  // console.log(accountAddress)
+  // await web3.eth.personal.unlockAccount(
+  //   accountAddress,
+  //   config.accountPassword,
+  //   500,
+  // )
+  // if (bandClient !== undefined) {
+  //   // send fee and feeless
+  //   const tx = await bandClient.createTransferTransaction(
+  //     '0xCE3E5C43bcF9BB937D50653BB830723fa477ED1E',
+  //     new BN('1000000000000000000'), // 1 band
+  //   )
+  //   console.log('OK sendFeeles', await tx.sendFeeless())
+  //   // console.log('OK send', await tx.send())
+  // }
 })()
 
 // Community Test
@@ -43,18 +44,18 @@ BandProtocolClient.setAPI('https://api.rinkeby.bandprotocol.com')
   })
   if (bandClient !== undefined) {
     // console.log(config)
-    // const web3: Web3 = new Web3(provider)
+    const web3: Web3 = new Web3(provider)
     // // console.log(await bandClient.getNetworkType())
-    // const accountAddress = (await web3.eth.getAccounts())[0]
-    // console.log(accountAddress)
+    const accountAddress = (await web3.eth.getAccounts())[0]
+    console.log(accountAddress)
     // console.log((await bandClient.getBalance()).toString())
     // // console.log(await bandClient.getBand())
     // // console.log(await bandClient.getDApps())
-    // await web3.eth.personal.unlockAccount(
-    //   accountAddress,
-    //   config.accountPassword,
-    //   500,
-    // )
+    await web3.eth.personal.unlockAccount(
+      accountAddress,
+      config.accountPassword,
+      500,
+    )
     // const x: any = await bandClient.deployCommunity(
     //   'HazardApp',
     //   'HZC',
@@ -97,14 +98,14 @@ BandProtocolClient.setAPI('https://api.rinkeby.bandprotocol.com')
     //   '(x^2/2000000000000000000000000000000000000)^2',
     // )
     // console.log(x)
-    // const XCHClient = await bandClient.at(
-    //   '0x41aAbBB1007E515F04E64e8495eBe06AeeFa0AB5',
-    // )
+    const XCHClient = await bandClient.at(
+      '0xA624312D6b733855548bd3F4901D9b6aC465e0Dc',
+    )
     // console.log('token balance: ', (await XCHClient.getBalance()).toString())
 
     // await XCHClient.reportDetail({
-    //   name: 'GodApp',
-    //   symbol: 'GAC',
+    //   name: 'TestSimpleTCR',
+    //   symbol: 'TST',
     //   logo: 'https://i.imgur.com/rYPVs3s.jpg',
     //   description: 'The Next Band Protocol dApp',
     //   website: 'https://NewBandApp.com',
@@ -113,11 +114,12 @@ BandProtocolClient.setAPI('https://api.rinkeby.bandprotocol.com')
     //     'x * ((2* x / 2000000000000000000000000000000000000) ^ 2) * curve / 1000000000000',
     // })
     // // buy XCH by BandToken <----------------------
-    // const buyAmount = '5000000000000000000' //5 token
+    // const buyAmount = '310000000000000000000' //310 token
     // const buyPrice = await XCHClient.getBuyPrice(buyAmount)
     // console.log('BuyPrice: ', buyPrice.toString())
     // const buyTx = await XCHClient.createBuyTransaction(buyAmount, buyPrice)
-    // console.log(await buyTx.sendFeeless())
+    // // console.log(await buyTx.sendFeeless())
+    // console.log(await buyTx.send())
     // // sell XCH by BandToken <-----------------------
     // const sellAmount = new BN('500000000000000000') //0.5 token
     // const sellPrice = await XCHClient.getSellPrice(sellAmount)
@@ -164,22 +166,78 @@ BandProtocolClient.setAPI('https://api.rinkeby.bandprotocol.com')
     // console.log(await tx.send())
 
     /////////////////Params Test///////////////////
-    // const tx = await XCHClient.createProposalTransaction(
-    //   ['params:reveal_time', 'params:support_required_pct'],
-    //   ['50', new BN('60')],
+    const parameterClient = XCHClient.parameter()
+    // const paramTx = await parameterClient.createProposalTransaction(
+    //   ['params:expiration_time', 'params:support_required_pct'],
+    //   ['300', new BN('50')],
     // )
-    // console.log(await tx.send())
-    // const tx2 = await XCHClient.createVoteProposalTransaction(
-    //   3,
-    //   new BN('100000000000000000'),
-    //   '0',
-    // )
-    // console.log(await tx2.sendFeeless())
-    // console.log(await XCHClient.getParameters())
-    // const proposals = await XCHClient.getProposals()
+    // console.log(await paramTx.sendFeeless())
+    const tx2 = await parameterClient.createCastVoteTransaction(
+      11,
+      new BN('5000000000000000000'),
+      '0',
+    )
+    console.log(await tx2.send())
+    // console.log(await parameterClient.getParameters())
+    // const proposals = await parameterClient.getProposals()
     // console.log(proposals)
-    // console.log(proposals[1].changes)
-    // console.log(await XCHClient.getVoteResultProposals())
+    // console.log(proposals[0].changes)
+    // console.log(await parameterClient.getVoteResultProposals())
+
+    ////////tcr///////////
+    // const tcrClient = XCHClient.tcr(
+    //   '0xdfb96749910fcc1b3764e5d12200bb5c79115238',
+    // )
+
+    // const entryHash = '0x61316932311239512342319239293923929392392939293923931'
+    // const reasonHash = '0x613169323112111192399239293923949392392939293923931'
+
+    // const entryHash = '0x178237871247712488123818248812841823812388'
+
+    // const entryTx = await tcrClient.createEntryTransaction(
+    //   entryHash,
+    //   '100000000000000000000',
+    // )
+    // console.log(await entryTx.sendFeeless())
+
+    // const entryDepositTx = await tcrClient.createDepositTransaction(
+    //   entryHash,
+    //   '10000000000000000000',
+    // )
+    // console.log(await entryDepositTx.sendFeeless())
+
+    // const entryWithDrawTx = await tcrClient.createWithdrawTransaction(
+    //   entryHash,
+    //   '5000000000000000000',
+    // )
+    // console.log(await entryWithDrawTx.send())
+
+    // const entryChallengeTx = await tcrClient.createChallengeTransaction(
+    //   entryHash,
+    //   reasonHash,
+    //   '100000000000000000000',
+    // )
+    // console.log(await entryChallengeTx.sendFeeless())
+
+    // const entryCommitTx = await tcrClient.createCommitVoteTransaction(
+    //   5,
+    //   '10000000000000000000',
+    //   '0',
+    //   '555',
+    // )
+    // console.log(await entryCommitTx.send())
+
+    // const entryRevealTx = await tcrClient.createRevealVoteTransaction(
+    //   5,
+    //   '10000000000000000000',
+    //   '0',
+    //   '555',
+    // )
+    // console.log(await entryRevealTx.send())
+
+    // const entryExitTx = await tcrClient.createExitTransaction(entryHash)
+    // console.log(await entryExitTx.send())
+
     console.log('ending', new BN(''))
   }
 })()

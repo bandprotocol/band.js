@@ -2,22 +2,21 @@ import _ from 'lodash'
 import Web3 from 'web3'
 import BN from 'bn.js'
 import BaseClient from './BaseClient'
+import ParameterClient from './ParameterClient'
+import TCRClient from './TCRClient'
 import Utils from './Utils'
 import {
   OrderHistory,
   Address,
   Equation,
   PriceHistory,
-  Parameter,
-  Proposal,
-  VoteResult,
   RewardDetail,
-} from '../typing/index'
+} from '../typing'
 
 export default class CommunityClient extends BaseClient {
-  private coreAddress?: Address
+  private coreAddress: Address
 
-  constructor(web3?: Web3, coreAddress?: Address) {
+  constructor(coreAddress: Address, web3?: Web3) {
     super(web3)
     this.coreAddress = coreAddress
   }
@@ -245,63 +244,12 @@ export default class CommunityClient extends BaseClient {
     return rewards
   }
 
-  async getParameters(): Promise<Parameter[]> {
-    const result = await this.getRequestDApps('/parameters')
-    return result.map((e: { key: string; value: string }) => ({
-      ...e,
-      value: new BN(e.value),
-    }))
+  parameter() {
+    return new ParameterClient(this.coreAddress, this.web3)
   }
 
-  async getProposals(): Promise<Proposal[]> {
-    const result = await this.getRequestDApps('/proposals')
-    return result.map((e: any) => ({
-      ...e,
-      changes: e.changes.map((i: { key: string; value: string }) => ({
-        ...i,
-        value: new BN(i.value),
-      })),
-      yesVote: new BN(e.yesVote),
-      noVote: new BN(e.noVote),
-    }))
-  }
-
-  async getVoteResultProposals(): Promise<VoteResult[]> {
-    const account = await this.getAccount()
-    const result = await this.getRequestDApps(`/proposals/vote/${account}`)
-    return result.map((e: any) => ({
-      ...e,
-      yesVote: new BN(e.yesVote),
-      noVote: new BN(e.noVote),
-    }))
-  }
-
-  async createProposalTransaction(keys: string[], values: (string | BN)[]) {
-    const { to: tokenAddress, data, nonce } = await this.postRequestDApps(
-      '/proposals',
-      {
-        sender: await this.getAccount(),
-        keys,
-        values: values.map((e: string | BN) => (BN.isBN(e) ? e.toString() : e)),
-      },
-    )
-    return this.createTransaction(tokenAddress, data, true, nonce)
-  }
-
-  async createVoteProposalTransaction(
-    proposalID: number,
-    yesVote: string | BN,
-    noVote: string | BN,
-  ) {
-    const { to: tokenAddress, data, nonce } = await this.postRequestDApps(
-      `/proposals/${proposalID}/vote`,
-      {
-        sender: await this.getAccount(),
-        yesVote: BN.isBN(yesVote) ? yesVote.toString() : yesVote,
-        noVote: BN.isBN(noVote) ? noVote.toString() : noVote,
-      },
-    )
-    return this.createTransaction(tokenAddress, data, true, nonce)
+  tcr(tcrAddress: Address) {
+    return new TCRClient(tcrAddress, this.web3)
   }
 
   private async getRequestDApps(path: string, params?: any): Promise<any> {

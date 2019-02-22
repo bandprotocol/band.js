@@ -29,7 +29,7 @@ export default class BandProtocolClient extends BaseClient {
     }
   }
 
-  async getBand(): Promise<BandInfo> {
+  async getBandInfo(): Promise<BandInfo> {
     const { band } = await Utils.getRequest('/dapps')
     return {
       ...band,
@@ -38,7 +38,7 @@ export default class BandProtocolClient extends BaseClient {
     }
   }
 
-  async getDApps(): Promise<DappInfo[]> {
+  async getDAppsInfo(): Promise<DappInfo[]> {
     const { dapps } = await Utils.getRequest('/dapps')
     return dapps.map((e: any) => ({
       ...e,
@@ -118,7 +118,7 @@ export default class BandProtocolClient extends BaseClient {
     if (filterDapps.length === 0) {
       return Utils.throw("This dapp contract's address is invalid.")
     }
-    return new CommunityClient(this.web3, filterDapps[0].address)
+    return new CommunityClient(filterDapps[0].address, this.web3)
   }
 
   /***
