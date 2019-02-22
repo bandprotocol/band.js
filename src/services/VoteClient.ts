@@ -59,7 +59,7 @@ export default class VoteClient extends BaseClient {
     noVote: string | BN,
     salt: string,
   ) {
-    const { to, data, nonce } = await this.postRequestVote(
+    const { to, data } = await this.postRequestVote(
       `/${onChainId}/revealvote`,
       {
         sender: await this.getAccount(),
@@ -68,7 +68,7 @@ export default class VoteClient extends BaseClient {
         salt,
       },
     )
-    return this.createTransaction(to, data, true, nonce)
+    return this.createTransaction(to, data, false)
   }
 
   private async postRequestVote(path: string, data: any): Promise<any> {

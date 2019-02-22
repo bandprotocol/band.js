@@ -166,18 +166,18 @@ BandProtocolClient.setAPI('https://api-wip.rinkeby.bandprotocol.com')
     // console.log(await tx.send())
 
     /////////////////Params Test///////////////////
-    const parameterClient = XCHClient.parameter()
+    // const parameterClient = XCHClient.parameter()
     // const paramTx = await parameterClient.createProposalTransaction(
     //   ['params:expiration_time', 'params:support_required_pct'],
     //   ['300', new BN('50')],
     // )
     // console.log(await paramTx.sendFeeless())
-    const tx2 = await parameterClient.createCastVoteTransaction(
-      11,
-      new BN('5000000000000000000'),
-      '0',
-    )
-    console.log(await tx2.send())
+    // const tx2 = await parameterClient.createCastVoteTransaction(
+    //   11,
+    //   new BN('5000000000000000000'),
+    //   '0',
+    // )
+    // console.log(await tx2.send())
     // console.log(await parameterClient.getParameters())
     // const proposals = await parameterClient.getProposals()
     // console.log(proposals)
