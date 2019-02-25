@@ -156,14 +156,14 @@ export default class CommunityClient extends BaseClient {
     const tx = await this.createTransaction(tokenAddress, data, false)
     const { logs } = await tx.send()
     if (!logs) return
-    const rewardID = parseInt(logs[0].topics[1] as any) // TODO: Figure out why topics[1] can be string[]
+    const rewardId = parseInt(logs[0].topics[1] as any) // TODO: Figure out why topics[1] can be string[]
 
     await this.reportRewardDetail({
       imageLink,
       detailLink,
       header,
       period,
-      rewardID,
+      rewardId,
     })
   }
 
@@ -172,15 +172,15 @@ export default class CommunityClient extends BaseClient {
     detailLink,
     header,
     period,
-    rewardID,
+    rewardId,
   }: {
     imageLink: string
     detailLink: string
     header: string
     period: string
-    rewardID: number
+    rewardId: number
   }) {
-    await this.postRequestDApps(`/rewards/${rewardID}/detail`, {
+    await this.postRequestDApps(`/rewards/${rewardId}/detail`, {
       imageLink,
       detailLink,
       header,
@@ -188,8 +188,8 @@ export default class CommunityClient extends BaseClient {
     })
   }
 
-  async createClaimRewardTransaction(rewardID: number) {
-    const { rootHash } = await this.getRewardDetail(rewardID)
+  async createClaimRewardTransaction(rewardId: number) {
+    const { rootHash } = await this.getRewardDetail(rewardId)
     const account = await this.getAccount()
     const proof = await this.getRequestMerkle(`/${rootHash}/proof/${account}`)
     const kvs = await this.getRequestMerkle(`/${rootHash}`, {
@@ -199,7 +199,7 @@ export default class CommunityClient extends BaseClient {
       InternalUtils.throw('Reward not found')
     }
     const { to: tokenAddress, data } = await this.postRequestDApps(`/rewards`, {
-      rewardID,
+      rewardId,
       beneficiary: account,
       rewardPortion: kvs[0].value,
       proof,
@@ -207,9 +207,9 @@ export default class CommunityClient extends BaseClient {
     return this.createTransaction(tokenAddress, data, false)
   }
 
-  async getRewardDetail(rewardID: number): Promise<RewardDetail> {
+  async getRewardDetail(rewardId: number): Promise<RewardDetail> {
     const rewards = await this.getRequestDApps(`/rewards`)
-    return rewards.filter((reward: any) => reward.rewardID === rewardID)[0]
+    return rewards.filter((reward: any) => reward.rewardId === rewardId)[0]
   }
 
   async getRewards(): Promise<RewardDetail[]> {
@@ -223,7 +223,7 @@ export default class CommunityClient extends BaseClient {
     const user = await this.getAccount()
     for (const reward of rewards) {
       const claim = await this.getRequestDApps(
-        `/rewards/${reward.rewardID}/claim/${user}`,
+        `/rewards/${reward.rewardId}/claim/${user}`,
       )
       if (claim.claimed) {
         reward.claimed = true

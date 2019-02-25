@@ -1,6 +1,13 @@
 import BN from 'bn.js'
 
 /**
+ * alias
+ */
+export type Address = string
+export type Equation = string
+export type Time = string
+
+/**
  * This is a interface of object that response from axios.
  */
 export interface JsonResponse {
@@ -16,7 +23,7 @@ export interface OrderHistory {
   orderType: string
   value: BN
   price: BN
-  blockTime: string
+  blockTime: Time
   txHash: string
 }
 
@@ -24,15 +31,9 @@ export interface OrderHistory {
  * This is interface of object for getPriceHistory function.
  */
 export interface PriceHistory {
-  time: string
+  time: Time
   price: number
 }
-
-/**
- * alias
- */
-export type Address = string
-export type Equation = string
 
 export interface BandInfo {
   address: Address
@@ -58,7 +59,7 @@ export interface Parameter {
 }
 
 export interface Proposal {
-  proposalID: number
+  proposalId: number
   proposer: Address
   changes: Parameter[]
   yesVote: BN
@@ -66,13 +67,13 @@ export interface Proposal {
 }
 
 export interface VoteResult {
-  proposalID: number
+  proposalId: number
   yesVote: BN
   noVote: BN
 }
 
 export interface RewardDetail {
-  rewardID: number
+  rewardId: number
   rootHash: string
   totalReward: BN
   totalClaims: number
@@ -83,4 +84,49 @@ export interface RewardDetail {
   period: string
   claimed?: boolean
   amount?: BN
+}
+
+export interface Entry {
+  dataHash: string
+  proposer: Address
+  deposit: BN
+  proposedAt: Time
+  listAt: Time
+  status: string
+  challengeId?: number
+}
+
+export interface Challenge {
+  entryHash: string
+  challenger: Address
+  stake: BN
+  challengeAt: Time
+  commitEndTime: Time
+  revealEndTime: Time
+  challengeId: number
+  minParticipation: BN
+  supportRequiredPct: BN
+  currentParticipation: BN
+  currentYesVote: BN
+  currentNoVote: BN
+  voterReward?: BN
+  leaderReward?: BN
+  status: string
+}
+
+export interface Vote {
+  voter: Address
+  commitHash: string
+  yesWeight: BN
+  noWeight: BN
+  onchainId: number
+  claimed?: boolean
+}
+
+export interface EntryEvent {
+  type: string
+  timestamp: Time
+  depositChanged: BN
+  proposer?: Address
+  txHash?: string
 }

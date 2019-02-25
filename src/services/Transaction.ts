@@ -34,41 +34,21 @@ export default class Transaction {
     })
   }
 
-  // TODO: metamask bug
-  async signByUser(dataNoSig: string) {
-    if (typeof window !== 'undefined') {
-      const metaMaskWeb3 = (window as any).web3
-      return new Promise((resolve, reject) => {
-        if (this.nonce === undefined)
-          return InternalUtils.throw('Required nonce.')
-        metaMaskWeb3.personal.sign(
-          this.web3.utils.soliditySha3(this.nonce, dataNoSig),
-          this.sender,
-          function(err: any, signed: any) {
-            if (err !== null) reject(err)
-            resolve(signed)
-          },
-        )
-      })
-    } else {
-      if (this.nonce === undefined)
-        return InternalUtils.throw('Required nonce.')
-      return await this.web3.eth.sign(
-        this.web3.utils.soliditySha3(this.nonce, dataNoSig),
-        this.sender,
-      )
-    }
-  }
-
   async sendFeeless() {
     // 0x(2hex) + funcSig(8hex) + userAddress(64hex) + otherParams = data
     if (!this.isFeelessable)
       return InternalUtils.throw(
         'This function cannot use feeless transaction.',
       )
+    if (this.nonce === undefined) return InternalUtils.throw('Required nonce')
+
     const funcInterface = '0x' + this.data.slice(2, 10)
     const dataNoSig = '0x' + this.data.slice(10 + 64)
-    const senderSig = await this.signByUser(dataNoSig)
+    const senderSig = await InternalUtils.signMessage(
+      this.web3,
+      this.web3.utils.soliditySha3(this.nonce, dataNoSig),
+      this.sender,
+    )
 
     return InternalUtils.postRequest('/band/feeless', {
       sender: this.sender,

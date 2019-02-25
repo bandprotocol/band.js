@@ -1,5 +1,7 @@
+import Web3 from 'web3'
+
 import axios from 'axios'
-import { JsonResponse } from '../typing'
+import { JsonResponse, Address } from '../typing'
 
 export default class InternalUtils {
   static API = 'https://api.bandprotocol.com'
@@ -24,5 +26,22 @@ export default class InternalUtils {
       throw new Error(response.data.message)
     }
     return response.data.result
+  }
+
+  static async signMessage(web3: Web3, message: string, sender: Address) {
+    if (typeof window !== 'undefined') {
+      const metaMaskWeb3 = (window as any).web3
+      return new Promise<string>((resolve, reject) => {
+        metaMaskWeb3.personal.sign(message, sender, function(
+          err: any,
+          signed: any,
+        ) {
+          if (err !== null) reject(err)
+          else resolve(signed)
+        })
+      })
+    } else {
+      return await web3.eth.sign(message, sender)
+    }
   }
 }

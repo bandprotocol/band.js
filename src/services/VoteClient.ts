@@ -2,7 +2,7 @@ import Web3 from 'web3'
 import BN from 'bn.js'
 import InternalUtils from './InternalUtils'
 import BaseClient from './BaseClient'
-import { Address } from '../typing'
+import { Address, Vote } from '../typing'
 
 export default class VoteClient extends BaseClient {
   private sendAddress: Address // coreAddres or tcrAddress
@@ -69,6 +69,20 @@ export default class VoteClient extends BaseClient {
       },
     )
     return this.createTransaction(to, data, false)
+  }
+
+  async getVotes(voter?: Address, pollIds?: number[]): Promise<Vote> {
+    return await this.getRequestVote('/votes', {
+      voter,
+      pollIds,
+    })
+  }
+
+  private async getRequestVote(path: string, params: any): Promise<any> {
+    return await InternalUtils.getRequest(
+      `/voting/${this.sendAddress}${path}`,
+      params,
+    )
   }
 
   private async postRequestVote(path: string, data: any): Promise<any> {
