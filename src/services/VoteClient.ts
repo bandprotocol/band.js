@@ -1,6 +1,6 @@
 import Web3 from 'web3'
 import BN from 'bn.js'
-import Utils from './Utils'
+import InternalUtils from './InternalUtils'
 import BaseClient from './BaseClient'
 import { Address } from '../typing'
 
@@ -36,7 +36,7 @@ export default class VoteClient extends BaseClient {
     salt: string,
   ) {
     if (this.web3 === undefined) {
-      return Utils.throw('Required provider.')
+      return InternalUtils.throw('Required provider.')
     }
     const commitHash = this.web3.utils.soliditySha3(yesVote, noVote, salt)
     const yesVoteBN = BN.isBN(yesVote) ? yesVote : new BN(yesVote)
@@ -72,6 +72,9 @@ export default class VoteClient extends BaseClient {
   }
 
   private async postRequestVote(path: string, data: any): Promise<any> {
-    return await Utils.postRequest(`/voting/${this.sendAddress}${path}`, data)
+    return await InternalUtils.postRequest(
+      `/voting/${this.sendAddress}${path}`,
+      data,
+    )
   }
 }

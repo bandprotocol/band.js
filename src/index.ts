@@ -1,3 +1,4 @@
 import BandProtocolClient from './services/BandProtocolClient'
+import Utils from './services/Utils'
 
-export default BandProtocolClient
+export { BandProtocolClient, Utils }

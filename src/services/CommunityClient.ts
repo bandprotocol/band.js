@@ -4,7 +4,7 @@ import BN from 'bn.js'
 import BaseClient from './BaseClient'
 import ParameterClient from './ParameterClient'
 import TCRClient from './TCRClient'
-import Utils from './Utils'
+import InternalUtils from './InternalUtils'
 import {
   OrderHistory,
   Address,
@@ -196,7 +196,7 @@ export default class CommunityClient extends BaseClient {
       key: account,
     })
     if (kvs.length === 0) {
-      Utils.throw('Reward not found')
+      InternalUtils.throw('Reward not found')
     }
     const { to: tokenAddress, data } = await this.postRequestDApps(`/rewards`, {
       rewardID,
@@ -253,15 +253,21 @@ export default class CommunityClient extends BaseClient {
   }
 
   private async getRequestDApps(path: string, params?: any): Promise<any> {
-    return await Utils.getRequest(`/dapps/${this.coreAddress}${path}`, params)
+    return await InternalUtils.getRequest(
+      `/dapps/${this.coreAddress}${path}`,
+      params,
+    )
   }
   private async postRequestDApps(path: string, data: any): Promise<any> {
-    return await Utils.postRequest(`/dapps/${this.coreAddress}${path}`, data)
+    return await InternalUtils.postRequest(
+      `/dapps/${this.coreAddress}${path}`,
+      data,
+    )
   }
   private async getRequestMerkle(path: string, params?: any): Promise<any> {
-    return await Utils.getRequest(`/merkle${path}`, params)
+    return await InternalUtils.getRequest(`/merkle${path}`, params)
   }
   private async postRequestMerkle(path: string, data: any): Promise<any> {
-    return await Utils.postRequest(`/merkle${path}`, data)
+    return await InternalUtils.postRequest(`/merkle${path}`, data)
   }
 }

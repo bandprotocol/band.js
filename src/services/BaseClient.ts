@@ -1,5 +1,5 @@
 import Web3 from 'web3'
-import Utils from './Utils'
+import InternalUtils from './InternalUtils'
 // import BN from 'bn.js'
 import { Address } from '../typing'
 import Transaction from './Transaction'
@@ -16,7 +16,8 @@ export default class BaseClient {
   }
 
   protected async getAccount(): Promise<Address> {
-    if (this.web3 === undefined) return Utils.throw('Required provider.')
+    if (this.web3 === undefined)
+      return InternalUtils.throw('Required provider.')
     return (await this.web3.eth.getAccounts())[0]
   }
 
@@ -30,12 +31,13 @@ export default class BaseClient {
     isFeelessable: boolean,
     nonce?: number,
   ) {
-    if (this.web3 === undefined) return Utils.throw('Required provider.')
+    if (this.web3 === undefined)
+      return InternalUtils.throw('Required provider.')
     const sender = await this.getAccount()
     return new Transaction(this.web3, sender, to, data, isFeelessable, nonce)
 
     // sendAndWait6Confirmations: () => {
-    //   if (this.web3 === undefined) return Utils.throw('Required provider.')
+    //   if (this.web3 === undefined) return InternalUtils.throw('Required provider.')
     //   const promi = this.web3.eth.sendTransaction({
     //     from,
     //     to,

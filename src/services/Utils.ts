@@ -1,28 +1,14 @@
-import axios from 'axios'
-import { JsonResponse } from '../typing'
+import BigNumber from 'bignumber.js'
+import BN from 'bn.js'
 
-export default class Utils {
-  static API = 'https://api.bandprotocol.com'
-
-  static throw(m: string): never {
-    throw new Error(m)
+export default class Utills {
+  static fromBlockchainUnit(value: BN): number {
+    return new BigNumber(value.toString()).div(new BigNumber(1e18)).toNumber()
   }
 
-  static async getRequest(path: string, params?: any): Promise<any> {
-    const url = Utils.API + path
-    const response = await axios.get<JsonResponse>(url, { params })
-    if (response.data.message !== undefined) {
-      throw new Error(response.data.message)
-    }
-    return response.data.result
-  }
-
-  static async postRequest(path: string, data: any): Promise<any> {
-    const url = Utils.API + path
-    const response = await axios.post<JsonResponse>(url, data)
-    if (response.data.message !== undefined) {
-      throw new Error(response.data.message)
-    }
-    return response.data.result
+  static toBlockchainUnit(value: number | string): BN {
+    return new BN(
+      new BigNumber(value).multipliedBy(new BigNumber(1e18)).toFixed(0),
+    )
   }
 }

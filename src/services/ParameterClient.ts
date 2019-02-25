@@ -1,7 +1,7 @@
 import BaseClient from './BaseClient'
 import VoteClient from './VoteClient'
 import Web3 from 'web3'
-import Utils from './Utils'
+import InternalUtils from './InternalUtils'
 import BN from 'bn.js'
 
 import { Address, Parameter, Proposal, VoteResult } from '../typing'
@@ -74,13 +74,13 @@ export default class ParameterClient extends BaseClient {
 
   private async getRequestParameter(path?: string, params?: any): Promise<any> {
     const sendPath = path === undefined ? '' : path
-    return await Utils.getRequest(
+    return await InternalUtils.getRequest(
       `/parameter/${this.coreAddress}${sendPath}`,
       params,
     )
   }
   private async postRequestParameter(path: string, data: any): Promise<any> {
-    return await Utils.postRequest(
+    return await InternalUtils.postRequest(
       `/parameter/${this.coreAddress}${path}`,
       data,
     )

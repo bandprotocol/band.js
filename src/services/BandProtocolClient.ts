@@ -3,7 +3,7 @@ import Web3 from 'web3'
 // import { Provider } from 'web3/providers'  TODO: bring back provider type
 import BaseClient from './BaseClient'
 import CommunityClient from './CommunityClient'
-import Utils from './Utils'
+import InternalUtils from './InternalUtils'
 import { Address, Equation, BandInfo, DappInfo } from '../typing/index'
 
 /**
@@ -30,7 +30,7 @@ export default class BandProtocolClient extends BaseClient {
   }
 
   async getBandInfo(): Promise<BandInfo> {
-    const { band } = await Utils.getRequest('/dapps')
+    const { band } = await InternalUtils.getRequest('/dapps')
     return {
       ...band,
       price: parseFloat(band.price),
@@ -39,7 +39,7 @@ export default class BandProtocolClient extends BaseClient {
   }
 
   async getDAppsInfo(): Promise<DappInfo[]> {
-    const { dapps } = await Utils.getRequest('/dapps')
+    const { dapps } = await InternalUtils.getRequest('/dapps')
     return dapps.map((e: any) => ({
       ...e,
       marketCap: parseFloat(e.marketCap),
@@ -51,7 +51,7 @@ export default class BandProtocolClient extends BaseClient {
   // TODO: recheck again
   async enableEthereum() {
     if (this.web3 === undefined) {
-      return Utils.throw('Required provider.')
+      return InternalUtils.throw('Required provider.')
     }
     const enable = (this.web3.eth as any).requestAccounts
     if (enable) {
@@ -89,7 +89,7 @@ export default class BandProtocolClient extends BaseClient {
     // )).sendAndWait6Confirmations()
     const chunk = logs
       ? logs[logs.length - 1].data
-      : Utils.throw("Transaction's logs is invalid.")
+      : InternalUtils.throw("Transaction's logs is invalid.")
     const coreAddress = '0x' + chunk.slice(218, 258)
     const communityClient = await this.at(coreAddress)
     await communityClient.reportDetail({
@@ -110,13 +110,13 @@ export default class BandProtocolClient extends BaseClient {
    * @returns An instance of CommunityClient.
    */
   async at(coreAddress: Address) {
-    const { dapps } = await Utils.getRequest('/dapps')
+    const { dapps } = await InternalUtils.getRequest('/dapps')
     const filterDapps = dapps.filter(
       (element: any) =>
         element.address.toLowerCase() === coreAddress.toLowerCase(),
     )
     if (filterDapps.length === 0) {
-      return Utils.throw("This dapp contract's address is invalid.")
+      return InternalUtils.throw("This dapp contract's address is invalid.")
     }
     return new CommunityClient(filterDapps[0].address, this.web3)
   }
@@ -128,7 +128,7 @@ export default class BandProtocolClient extends BaseClient {
    */
   async getNetworkType(): Promise<string> {
     if (this.web3 === undefined) {
-      return Utils.throw('Required provider.')
+      return InternalUtils.throw('Required provider.')
     }
     const networkId = await this.web3.eth.net.getId()
     switch (networkId) {
@@ -176,14 +176,14 @@ export default class BandProtocolClient extends BaseClient {
   }
 
   private async getRequestBand(path: string): Promise<any> {
-    return await Utils.getRequest(`/band${path}`)
+    return await InternalUtils.getRequest(`/band${path}`)
   }
 
   private async postRequestBand(path: string, data: any): Promise<any> {
-    return await Utils.postRequest(`/band${path}`, data)
+    return await InternalUtils.postRequest(`/band${path}`, data)
   }
 
   static setAPI(newAPI: string) {
-    Utils.API = newAPI
+    InternalUtils.API = newAPI
   }
 }

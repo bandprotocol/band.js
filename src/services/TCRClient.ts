@@ -1,7 +1,7 @@
 import BaseClient from './BaseClient'
 import VoteClient from './VoteClient'
 import Web3 from 'web3'
-import Utils from './Utils'
+import InternalUtils from './InternalUtils'
 import BN from 'bn.js'
 import { Address } from '../typing'
 
@@ -93,9 +93,12 @@ export default class TCRClient extends BaseClient {
   }
 
   //   private async getRequestTCR(path: string, params?: any): Promise<any> {
-  //     return await Utils.getRequest(`/tcr/${this.tcrAddress}${path}`, params)
+  //     return await InternalUtils.getRequest(`/tcr/${this.tcrAddress}${path}`, params)
   //   }
   private async postRequestTCR(path: string, data: any): Promise<any> {
-    return await Utils.postRequest(`/tcr/${this.tcrAddress}${path}`, data)
+    return await InternalUtils.postRequest(
+      `/tcr/${this.tcrAddress}${path}`,
+      data,
+    )
   }
 }
