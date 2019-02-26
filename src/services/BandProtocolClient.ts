@@ -66,7 +66,6 @@ export default class BandProtocolClient extends BaseClient {
     description: string,
     website: string,
     author: string,
-    priceEquation: Equation,
     voting: Address,
     keys: string[],
     values: (string | number)[],
@@ -99,7 +98,7 @@ export default class BandProtocolClient extends BaseClient {
       description,
       website,
       author,
-      priceEquation,
+      collateralEquation,
     })
     return communityClient
   }

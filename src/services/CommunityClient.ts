@@ -67,7 +67,7 @@ export default class CommunityClient extends BaseClient {
     description,
     website,
     author,
-    priceEquation,
+    collateralEquation,
   }: {
     name: string
     symbol: string
@@ -75,7 +75,7 @@ export default class CommunityClient extends BaseClient {
     description: string
     website: string
     author: string
-    priceEquation: Equation
+    collateralEquation: Equation
   }) {
     await this.postRequestDApps(`/detail`, {
       name,
@@ -84,7 +84,7 @@ export default class CommunityClient extends BaseClient {
       description,
       website,
       author,
-      priceEquation,
+      collateralEquation,
     })
   }
 
