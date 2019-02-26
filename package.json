@@ -21,10 +21,10 @@
     "bignumber.js": "^8.0.1",
     "qs": "^6.6.0",
     "typescript": "^3.1.6",
-    "web3": "^1.0.0-beta.41"
+    "web3": "1.0.0-beta.36"
   },
   "devDependencies": {
-    "@types/web3": "^1.0.12",
+    "@types/web3": "1.0.18",
     "ts-node": "^7.0.1",
     "typedoc": "^0.14.0"
   },
