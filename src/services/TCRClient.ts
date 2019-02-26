@@ -105,7 +105,11 @@ export default class TCRClient extends BaseClient {
     challengeIds?: number[]
     entryHash?: string
   }): Promise<Challenge[]> {
-    return await this.getRequestTCR('/challenge', args)
+    return await this.getRequestTCR('/challenge', {
+      challenger: args.challenger,
+      challengeId: args.challengeIds,
+      entryHash: args.entryHash,
+    })
   }
 
   async getVotes(args: { voter?: Address; challengeIds?: number[] }) {

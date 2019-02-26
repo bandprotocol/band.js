@@ -1,5 +1,5 @@
 import Web3 from 'web3'
-
+import Qs from 'qs'
 import axios from 'axios'
 import { JsonResponse, Address } from '../typing'
 
@@ -12,7 +12,11 @@ export default class InternalUtils {
 
   static async getRequest(path: string, params?: any): Promise<any> {
     const url = InternalUtils.API + path
-    const response = await axios.get<JsonResponse>(url, { params })
+    const listAxios = axios.create({
+      paramsSerializer: params =>
+        Qs.stringify(params, { arrayFormat: 'repeat' }),
+    })
+    const response = await listAxios.get<JsonResponse>(url, { params })
     if (response.data.message !== undefined) {
       throw new Error(response.data.message)
     }

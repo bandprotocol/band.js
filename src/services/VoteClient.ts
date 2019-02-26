@@ -74,7 +74,7 @@ export default class VoteClient extends BaseClient {
   async getVotes(voter?: Address, pollIds?: number[]): Promise<Vote> {
     return await this.getRequestVote('/votes', {
       voter,
-      pollIds,
+      pollId: pollIds,
     })
   }
 
