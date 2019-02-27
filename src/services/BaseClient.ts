@@ -18,7 +18,9 @@ export default class BaseClient {
   protected async getAccount(): Promise<Address> {
     if (this.web3 === undefined)
       return InternalUtils.throw('Required provider.')
-    return (await this.web3.eth.getAccounts())[0]
+    const account = (await this.web3.eth.getAccounts())[0]
+    if (!account) return InternalUtils.throw('Cannot get account.')
+    return account
   }
 
   protected isLogin(): boolean {
