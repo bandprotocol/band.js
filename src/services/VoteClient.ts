@@ -84,6 +84,15 @@ export default class VoteClient extends BaseClient {
     }))
   }
 
+  async getVotingPower(pollId: number): Promise<BN> {
+    const result = await this.getRequestVote(
+      `/${pollId}/voting-power/${await this.getAccount()}`,
+      {},
+    )
+
+    return new BN(result.votingPower)
+  }
+
   private async getRequestVote(path: string, params: any): Promise<any> {
     return await InternalUtils.getRequest(
       `/voting/${this.sendAddress}${path}`,

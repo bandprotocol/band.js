@@ -253,7 +253,8 @@ BandProtocolClient.setAPI('https://api-wip.rinkeby.bandprotocol.com')
   //     ],
   //   }),
   // )
-  console.log(await tcr.getChallenges({ challengeIds: [3, 11] }))
+  console.log((await tcr.getVotingPower(1)).toString())
+  // console.log(await tcr.getChallenges({ challengeIds: [3, 11] }))
   // console.log(await tcr.getVotes({ challengeIds: [1] }))
   // console.log(await tcr.getEntryHistory({}))
 })()

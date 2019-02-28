@@ -162,6 +162,10 @@ export default class TCRClient extends BaseClient {
     }))
   }
 
+  async getVotingPower(challengeId: number) {
+    return await this.voteClient.getVotingPower(challengeId)
+  }
+
   private async getRequestTCR(path: string, params?: any): Promise<any> {
     return await InternalUtils.getRequest(
       `/tcr/${this.tcrAddress}${path}`,
