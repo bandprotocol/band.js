@@ -151,12 +151,7 @@ export default class TCRClient extends BaseClient {
   }
 
   async getVotes(args: { voter?: Address; challengeIds?: number[] }) {
-    const result = await this.voteClient.getVotes(args.voter, args.challengeIds)
-    return {
-      ...result,
-      yesWeight: new BN(result.yesWeight),
-      noWeight: new BN(result.noWeight),
-    }
+    return await this.voteClient.getVotes(args.voter, args.challengeIds)
   }
 
   async getEntryHistory(args: { entryHash?: string }) {

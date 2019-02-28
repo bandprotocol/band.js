@@ -71,11 +71,17 @@ export default class VoteClient extends BaseClient {
     return this.createTransaction(to, data, false)
   }
 
-  async getVotes(voter?: Address, pollIds?: number[]): Promise<Vote> {
-    return await this.getRequestVote('/votes', {
+  async getVotes(voter?: Address, pollIds?: number[]): Promise<Vote[]> {
+    const result = await this.getRequestVote('/votes', {
       voter,
       pollId: pollIds,
     })
+
+    return result.map((e: any) => ({
+      ...e,
+      yesWeight: e.yesWeight && new BN(e.yesWeight),
+      noWeight: e.noWeight && new BN(e.noWeight),
+    }))
   }
 
   private async getRequestVote(path: string, params: any): Promise<any> {
