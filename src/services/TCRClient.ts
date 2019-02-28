@@ -82,7 +82,7 @@ export default class TCRClient extends BaseClient {
     challengeId: number,
     yesVote: string | BN,
     noVote: string | BN,
-    salt: string,
+    salt: string | BN,
   ) {
     return this.voteClient.createRevealVoteTransaction(
       challengeId,
@@ -185,15 +185,19 @@ export default class TCRClient extends BaseClient {
     )
   }
 
-  async createSalt(challengeId: number) {
+  async createSalt(challengeId: number): Promise<BN> {
     if (this.web3 === undefined)
       return InternalUtils.throw('Required provider.')
-    return this.web3.utils.soliditySha3(
-      await InternalUtils.signMessage(
-        this.web3,
-        `salt:${this.tcrAddress}:${challengeId}`,
-        await this.getAccount(),
-      ),
+    return new BN(
+      this.web3.utils
+        .soliditySha3(
+          await InternalUtils.signMessage(
+            this.web3,
+            `salt:${this.tcrAddress}:${challengeId}`,
+            await this.getAccount(),
+          ),
+        )
+        .slice(2),
     )
   }
 }

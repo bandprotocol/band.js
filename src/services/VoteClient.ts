@@ -33,7 +33,7 @@ export default class VoteClient extends BaseClient {
     onChainId: number,
     yesVote: string | BN,
     noVote: string | BN,
-    salt: string,
+    salt: string | BN,
   ) {
     if (this.web3 === undefined) {
       return InternalUtils.throw('Required provider.')
@@ -57,7 +57,7 @@ export default class VoteClient extends BaseClient {
     onChainId: number,
     yesVote: string | BN,
     noVote: string | BN,
-    salt: string,
+    salt: string | BN,
   ) {
     const { to, data } = await this.postRequestVote(
       `/${onChainId}/revealvote`,
@@ -65,7 +65,7 @@ export default class VoteClient extends BaseClient {
         sender: await this.getAccount(),
         yesVote: BN.isBN(yesVote) ? yesVote.toString() : yesVote,
         noVote: BN.isBN(noVote) ? noVote.toString() : noVote,
-        salt,
+        salt: BN.isBN(salt) ? salt.toString() : salt,
       },
     )
     return this.createTransaction(to, data, false)

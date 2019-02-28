@@ -2,7 +2,7 @@ import { BandProtocolClient, Utils } from '../src'
 // import * as Seed from './Seed.json'
 import config from './config-private'
 import Web3 from 'web3'
-// import BN from 'bn.js'
+import BN from 'bn.js'
 
 const ipc = config.gethConnection + 'geth.ipc'
 const provider = new Web3.providers.IpcProvider(ipc, require('net'))
@@ -243,7 +243,13 @@ BandProtocolClient.setAPI('https://api-wip.rinkeby.bandprotocol.com')
   const tcr = await (await bandClient.at(
     '0xeB7904c5D51B12136fBa246B4Dc7de28e46C622e',
   )).tcr('0x27c378ae32099a788705a8138cc5338f4f30d94f')
-
+  console.log(web3.utils.soliditySha3('1', '1', '20'))
+  console.log(web3.utils.soliditySha3('1', '1', new BN('20')))
+  console.log(web3.utils.soliditySha3('1', '1', 20))
+  console.log(new BN('14', 'hex').toString())
+  console.log(web3.utils.soliditySha3('1', '1', new BN('0x14'.slice(2), 'hex')))
+  const hash = await tcr.createSalt(1)
+  console.log(hash.toString())
   // console.log(await tcr.createSalt(1))
   // console.log(
   //   await tcr.getEntries({
@@ -261,6 +267,8 @@ BandProtocolClient.setAPI('https://api-wip.rinkeby.bandprotocol.com')
       ),
     ),
   )
+
+  // await tcr.createCommitVoteTransaction(1, "1000", "0", "")
   // console.log(await tcr.getChallenges({ challengeIds: [3, 11] }))
   // console.log(await tcr.getVotes({ challengeIds: [1] }))
   // console.log(await tcr.getEntryHistory({}))
