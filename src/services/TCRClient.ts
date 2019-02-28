@@ -96,8 +96,18 @@ export default class TCRClient extends BaseClient {
     status?: string
     proposer?: Address
     limit?: number
+    entryHashes?: string[]
   }): Promise<Entry[]> {
-    return await this.getRequestTCR('/entries', args)
+    const result = await this.getRequestTCR('/entries', {
+      status: args.status,
+      proposer: args.proposer,
+      limit: args.limit,
+      entryHash: args.entryHashes,
+    })
+    return result.map((e: any) => ({
+      ...e,
+      deposit: new BN(e.deposit),
+    }))
   }
 
   async getChallenges(args: {
@@ -105,19 +115,48 @@ export default class TCRClient extends BaseClient {
     challengeIds?: number[]
     entryHash?: string
   }): Promise<Challenge[]> {
-    return await this.getRequestTCR('/challenge', {
+    const result = await this.getRequestTCR('/challenge', {
       challenger: args.challenger,
       challengeId: args.challengeIds,
       entryHash: args.entryHash,
     })
+    return result.map((e: any) => {
+      const challenge = {
+        ...e,
+        stake: new BN(e.stake),
+        minParticipation: new BN(e.minParticipation),
+        currentParticipation: new BN(e.currentParticipation),
+        currentYesVote: new BN(e.currentYesVote),
+        currentNoVote: new BN(e.currentNoVote),
+      }
+
+      if (
+        e.status === 'SUCCEES' ||
+        e.status === 'FAILED' ||
+        e.status === 'INCONCLUSIVE'
+      ) {
+        challenge.voterReward = new BN(e.voterReward)
+        challenge.leaderReward = new BN(e.leaderReward)
+      }
+      return challenge
+    })
   }
 
   async getVotes(args: { voter?: Address; challengeIds?: number[] }) {
-    return await this.voteClient.getVotes(args.voter, args.challengeIds)
+    const result = await this.voteClient.getVotes(args.voter, args.challengeIds)
+    return {
+      ...result,
+      yesWeight: new BN(result.yesWeight),
+      noWeight: new BN(result.noWeight),
+    }
   }
 
   async getEntryHistory(args: { entryHash?: string }) {
-    return await this.getRequestTCR('/entry-history', args)
+    const result = await this.getRequestTCR('/entry-history', args)
+    return result.map((e: any) => ({
+      ...e,
+      depositChanged: new BN(e.depositChanged),
+    }))
   }
 
   private async getRequestTCR(path: string, params?: any): Promise<any> {

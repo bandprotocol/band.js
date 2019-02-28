@@ -237,16 +237,23 @@ BandProtocolClient.setAPI('https://api-wip.rinkeby.bandprotocol.com')
   console.log(accountAddress)
   await web3.eth.personal.unlockAccount(
     accountAddress,
-    config.accountPassword,
+    config.account0Password,
     500,
   )
   const tcr = await (await bandClient.at(
     '0xeB7904c5D51B12136fBa246B4Dc7de28e46C622e',
-  )).tcr('0xc4c4Ac3BCa8eb1f3010A46Fb003E1A9bE4e7F569')
+  )).tcr('0x27c378ae32099a788705a8138cc5338f4f30d94f')
 
-  console.log(await tcr.createSalt(1))
-  console.log(await tcr.getEntries({}))
+  // console.log(await tcr.createSalt(1))
+  // console.log(
+  //   await tcr.getEntries({
+  //     entryHashes: [
+  //       '0x8077be181515783d95eaa4d8caebb93341dfc8636753c43700c4883579d8530a',
+  //       '0xddd978e9ec330dfe78ad93bc6b576cc3bc46676f89f37eebaf6db76b977195b0',
+  //     ],
+  //   }),
+  // )
   console.log(await tcr.getChallenges({ challengeIds: [3, 11] }))
-  console.log(await tcr.getVotes({ challengeIds: [5, 7] }))
-  console.log(await tcr.getEntryHistory({}))
+  // console.log(await tcr.getVotes({ challengeIds: [1] }))
+  // console.log(await tcr.getEntryHistory({}))
 })()
