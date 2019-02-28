@@ -92,6 +92,14 @@ export default class TCRClient extends BaseClient {
     )
   }
 
+  async createClaimRewardTransaction(challengeId: number) {
+    const { to, data } = await this.postRequestTCR('/claim-reward', {
+      rewardOwner: await this.getAccount(),
+      challengeId,
+    })
+    return this.createTransaction(to, data, false)
+  }
+
   async getEntries(args: {
     status?: string
     proposer?: Address

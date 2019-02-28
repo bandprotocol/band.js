@@ -237,7 +237,7 @@ BandProtocolClient.setAPI('https://api-wip.rinkeby.bandprotocol.com')
   console.log(accountAddress)
   await web3.eth.personal.unlockAccount(
     accountAddress,
-    config.account0Password,
+    config.accountPassword,
     500,
   )
   const tcr = await (await bandClient.at(
