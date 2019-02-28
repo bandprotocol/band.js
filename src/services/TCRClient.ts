@@ -166,6 +166,12 @@ export default class TCRClient extends BaseClient {
     return await this.voteClient.getVotingPower(challengeId)
   }
 
+  async getMinDeposit(entryHash: string): Promise<BN> {
+    return new BN(
+      (await this.getRequestTCR(`/${entryHash}/min-deposit`, {})).minDeposit,
+    )
+  }
+
   private async getRequestTCR(path: string, params?: any): Promise<any> {
     return await InternalUtils.getRequest(
       `/tcr/${this.tcrAddress}${path}`,

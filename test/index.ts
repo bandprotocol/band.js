@@ -1,4 +1,4 @@
-import { BandProtocolClient } from '../src'
+import { BandProtocolClient, Utils } from '../src'
 // import * as Seed from './Seed.json'
 import config from './config-private'
 import Web3 from 'web3'
@@ -254,6 +254,13 @@ BandProtocolClient.setAPI('https://api-wip.rinkeby.bandprotocol.com')
   //   }),
   // )
   console.log((await tcr.getVotingPower(1)).toString())
+  console.log(
+    Utils.fromBlockchainUnit(
+      await tcr.getMinDeposit(
+        '0xe2b82e6ec8c33f7ab6dbf28358b52ed3ed28e18b634c9cd36cb2494ac064407d',
+      ),
+    ),
+  )
   // console.log(await tcr.getChallenges({ challengeIds: [3, 11] }))
   // console.log(await tcr.getVotes({ challengeIds: [1] }))
   // console.log(await tcr.getEntryHistory({}))
