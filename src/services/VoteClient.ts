@@ -31,23 +31,20 @@ export default class VoteClient extends BaseClient {
 
   async createCommitVoteTransaction(
     onChainId: number,
-    yesVote: string | BN,
-    noVote: string | BN,
-    salt: string | BN,
+    commitHash: string,
+    totalWeight: string | BN,
   ) {
     if (this.web3 === undefined) {
       return InternalUtils.throw('Required provider.')
     }
-    const commitHash = this.web3.utils.soliditySha3(yesVote, noVote, salt)
-    const yesVoteBN = BN.isBN(yesVote) ? yesVote : new BN(yesVote)
-    const noVoteBN = BN.isBN(noVote) ? noVote : new BN(noVote)
-    const totalWeightBN = yesVoteBN.add(noVoteBN)
     const { to, data, nonce } = await this.postRequestVote(
       `/${onChainId}/commitvote`,
       {
         sender: await this.getAccount(),
         commitHash: commitHash,
-        totalWeight: totalWeightBN.toString(),
+        totalWeight: BN.isBN(totalWeight)
+          ? totalWeight.toString()
+          : totalWeight,
       },
     )
     return this.createTransaction(to, data, true, nonce)

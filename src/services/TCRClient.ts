@@ -66,15 +66,13 @@ export default class TCRClient extends BaseClient {
 
   async createCommitVoteTransaction(
     challengeId: number,
-    yesVote: string | BN,
-    noVote: string | BN,
-    salt: string,
+    commitHash: string,
+    totalWeight: BN | string,
   ) {
     return this.voteClient.createCommitVoteTransaction(
       challengeId,
-      yesVote,
-      noVote,
-      salt,
+      commitHash,
+      totalWeight,
     )
   }
 
@@ -139,7 +137,7 @@ export default class TCRClient extends BaseClient {
       }
 
       if (
-        e.status === 'SUCCEES' ||
+        e.status === 'SUCCESS' ||
         e.status === 'FAILED' ||
         e.status === 'INCONCLUSIVE'
       ) {
@@ -198,6 +196,7 @@ export default class TCRClient extends BaseClient {
           ),
         )
         .slice(2),
+      'hex',
     )
   }
 }
