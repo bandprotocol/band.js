@@ -191,7 +191,9 @@ export default class TCRClient extends BaseClient {
         .soliditySha3(
           await InternalUtils.signMessage(
             this.web3,
-            `salt:${this.tcrAddress}:${challengeId}`,
+            this.web3.utils.asciiToHex(
+              `salt:${this.tcrAddress}:${challengeId}`,
+            ),
             await this.getAccount(),
           ),
         )

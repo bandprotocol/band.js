@@ -1,4 +1,5 @@
 import Web3 from 'web3'
+const Web3Legacy = require('web3-legacy')
 import Qs from 'qs'
 import axios from 'axios'
 import { JsonResponse, Address } from '../typing'
@@ -33,19 +34,17 @@ export default class InternalUtils {
   }
 
   static async signMessage(web3: Web3, message: string, sender: Address) {
-    if (typeof window !== 'undefined') {
-      const metaMaskWeb3 = (window as any).web3
+    try {
+      const oldWeb3 = new Web3Legacy(web3.currentProvider)
       return new Promise<string>((resolve, reject) => {
-        metaMaskWeb3.personal.sign(message, sender, function(
-          err: any,
-          signed: any,
-        ) {
+        oldWeb3.personal.sign(message, sender, function(err: any, signed: any) {
           if (err !== null) reject(err)
           else resolve(signed)
         })
       })
-    } else {
-      return await web3.eth.sign(message, sender)
+    } catch {
+      console.log('Cannot sign by legacy web3')
+      return this.throw('Cannot sign a message')
     }
   }
 }
