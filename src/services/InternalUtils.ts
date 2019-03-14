@@ -2,13 +2,35 @@ import Web3 from 'web3'
 const Web3Legacy = require('web3-legacy')
 import Qs from 'qs'
 import axios from 'axios'
-import { JsonResponse, Address } from '../typing'
+import { JsonResponse, GQLResponse, Address } from '../typing'
 
 export default class InternalUtils {
   static API = 'https://api.bandprotocol.com'
 
   static throw(m: string): never {
     throw new Error(m)
+  }
+
+  static circularStringify(o: any): any {
+    let cache: any = []
+    JSON.stringify(o, function(_, value) {
+      if (typeof value === 'object' && value !== null) {
+        if (cache.indexOf(value) !== -1) {
+          // Duplicate reference found
+          try {
+            // If this value does not reference a parent it can be deduped
+            return JSON.parse(JSON.stringify(value))
+          } catch (error) {
+            // discard key if value cannot be deduped
+            return
+          }
+        }
+        // Store value in our collection
+        cache.push(value)
+      }
+      return value
+    })
+    cache = null
   }
 
   static async getRequest(path: string, params?: any): Promise<any> {
@@ -31,6 +53,18 @@ export default class InternalUtils {
       throw new Error(response.data.message)
     }
     return response.data.result
+  }
+
+  static async graphqlRequest(query: any): Promise<any> {
+    const url = InternalUtils.API + '/graphql'
+    const response = await axios.post<GQLResponse>(url, {
+      query: query,
+    })
+    if (response.status !== 200) {
+      throw new Error(response.statusText)
+    }
+    const { data } = response.data
+    return data
   }
 
   static async signMessage(web3: Web3, message: string, sender: Address) {

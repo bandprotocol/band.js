@@ -24,6 +24,36 @@ export default class ParameterClient extends BaseClient {
     }))
   }
 
+  async getParametersQL(): Promise<Parameter[]> {
+    const { community } = await InternalUtils.graphqlRequest(
+      `
+    {
+      community(address: "${this.coreAddress}") {
+        config {
+          subConfigs {
+            keyValues {
+              key
+              value
+            }
+          }
+        }
+      }
+    }
+    `,
+    )
+    const { subConfigs } = community.config
+    const kvs = subConfigs.reduce(
+      (acc: any, subConfig: any) => acc.concat(subConfig.keyValues),
+      [],
+    )
+    return kvs.map((kv: any) => {
+      return {
+        key: kv.key,
+        value: new BN(kv.value),
+      }
+    })
+  }
+
   async getProposals(): Promise<Proposal[]> {
     const result = await this.getRequestParameter('/proposals')
     return result.map((e: any) => ({
@@ -34,6 +64,49 @@ export default class ParameterClient extends BaseClient {
       })),
       yesVote: new BN(e.yesVote),
       noVote: new BN(e.noVote),
+    }))
+  }
+
+  async getProposalsQL(): Promise<Proposal[]> {
+    const { community } = await InternalUtils.graphqlRequest(
+      `
+      {
+        community(address:"${this.coreAddress}") {
+          config {
+            proposals{
+              onChainId
+              reasonHash
+              proposer {
+                address
+              }
+              changes {
+                key
+                value
+              }
+              poll {
+                yesWeight
+                noWeight
+                status
+                ... on SimplePoll {
+                  pollEndTime
+                }
+              }
+            }
+          }
+        }
+      }
+    `,
+    )
+    const { proposals } = community.config
+    return proposals.map((proposal: any) => ({
+      proposalId: proposal.onChainId,
+      reasonHash: proposal.reasonHash,
+      proposer: proposal.proposer.address,
+      changes: proposal.changes,
+      yesVote: new BN(proposal.poll.yesWeight),
+      noVote: new BN(proposal.poll.noWeight),
+      pollEndTime: proposal.poll.pollEndTime,
+      status: proposal.poll.status,
     }))
   }
 

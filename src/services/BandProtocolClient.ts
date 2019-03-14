@@ -38,6 +38,18 @@ export default class BandProtocolClient extends BaseClient {
     }
   }
 
+  async getBandInfoQL(): Promise<BandInfo> {
+    // TODO : add price and last24Hrs
+    const { band } = await InternalUtils.graphqlRequest(
+      `{
+      band {
+        address
+      }
+    }`,
+    )
+    return { ...band, price: 1.03, last24Hrs: 6.28 }
+  }
+
   async getDAppsInfo(): Promise<DappInfo[]> {
     const { dapps } = await InternalUtils.getRequest('/dapps')
     return dapps.map((e: any) => ({
@@ -46,6 +58,22 @@ export default class BandProtocolClient extends BaseClient {
       price: parseFloat(e.price),
       last24Hrs: parseFloat(e.last24Hrs),
     }))
+  }
+
+  async getDAppsInfoQL(): Promise<DappInfo[]> {
+    const { allCommunities } = await InternalUtils.graphqlRequest(
+      `{
+        allCommunities {
+          address
+          token {
+            name
+          }
+        }
+      }`,
+    )
+    return allCommunities.map((comm: any) => {
+      return { ...comm.token, address: comm.address }
+    })
   }
 
   // TODO: recheck again
@@ -120,6 +148,20 @@ export default class BandProtocolClient extends BaseClient {
     return new CommunityClient(filterDapps[0].address, this.web3)
   }
 
+  async atQL(coreAddress: Address) {
+    const { community } = await InternalUtils.graphqlRequest(
+      `{
+      community(address:"${coreAddress}") {
+        address
+      }
+    }`,
+    )
+    if (community.address !== coreAddress) {
+      return InternalUtils.throw("This dapp contract's address is invalid.")
+    }
+    return new CommunityClient(community.address, this.web3)
+  }
+
   /***
    * This is a function what the user's network currently use.
    *
@@ -153,6 +195,22 @@ export default class BandProtocolClient extends BaseClient {
     const account = await this.getAccount()
     const result = await this.getRequestBand(`/balance/${account}`)
     return new BN(result.balance)
+  }
+
+  async getBalanceQL(): Promise<BN> {
+    const account = await this.getAccount()
+    const { band } = await InternalUtils.graphqlRequest(
+      `{
+        band {
+          balances(filteredBy:{
+            users: ["${account}"]
+          }) {
+            value
+          }
+        }
+      }`,
+    )
+    return new BN(band.balances[0].value)
   }
 
   /**

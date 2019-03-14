@@ -16,6 +16,13 @@ export interface JsonResponse {
 }
 
 /**
+ * This is a interface of object that response from axios.
+ */
+export interface GQLResponse {
+  data?: any
+}
+
+/**
  * This is interface of object for getOrderHistory function.
  */
 export interface OrderHistory {

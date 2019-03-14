@@ -27,6 +27,25 @@ export default class CommunityClient extends BaseClient {
     return new BN(result.balance)
   }
 
+  async getBalanceQL(): Promise<BN> {
+    const account = await this.getAccount()
+    const { community } = await InternalUtils.graphqlRequest(
+      `{
+        community(address: "${this.coreAddress}") {
+          token {
+            balances(filteredBy:{
+              users:["${account}"]
+            }) {
+              value
+            }
+          }
+        }
+      }
+    `,
+    )
+    return community.token.balances[0].value
+  }
+
   async getBuyPrice(amount: string | BN): Promise<BN> {
     const amountString = BN.isBN(amount) ? amount.toString() : amount
     const url = `/buy-price/${amountString}`
@@ -52,12 +71,77 @@ export default class CommunityClient extends BaseClient {
     }))
   }
 
+  async getOrderHistoryQL(args: {
+    user?: Address
+    type?: 'BUY' | 'SELL'
+  }): Promise<OrderHistory[]> {
+    // TODO : add limit filter
+    const { user, type } = args
+    const { community } = await InternalUtils.graphqlRequest(
+      `
+      {
+        community(address: "${this.coreAddress}") {
+          orderHistory(filteredBy:{
+            ${(() => (user ? `users: [${user}],` : ``))()}
+            ${(() => (type ? `orderTypes: [${type}],` : ``))()}
+          }) {
+            orderType
+            user {
+              address
+            }
+            value
+            price
+            tx {
+              blockTimestamp
+              txHash
+            }
+          }
+        }
+      }`,
+    )
+    const { orderHistory } = community
+    return orderHistory.map((history: any) => {
+      return {
+        orderType: history.orderType,
+        ...history.user,
+        value: new BN(history.value),
+        price: new BN(history.price),
+        blockTime: history.tx.blockTimestamp,
+        txHash: history.tx.txHash,
+      }
+    })
+  }
+
   async getPriceHistory(args: { limit?: number }): Promise<PriceHistory[]> {
     const result: any[] = await this.getRequestDApps('/price-history', args)
     return result.map((e: any) => ({
       time: e.time,
       price: parseFloat(e.price),
     }))
+  }
+
+  async getPriceHistoryQL(): Promise<PriceHistory[]> {
+    // TODO : add limit filter
+    const { community } = await InternalUtils.graphqlRequest(
+      `{
+        community(address: "${this.coreAddress}") {
+          priceHistory {
+            price
+            tx {
+              blockTimestamp
+            }
+          }
+        }
+      }
+      `,
+    )
+    const { priceHistory } = community
+    return priceHistory.map((history: any) => {
+      return {
+        time: history.tx.blockTimestamp,
+        price: history.price,
+      }
+    })
   }
 
   async reportDetail({

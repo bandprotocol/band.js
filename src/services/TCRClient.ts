@@ -116,6 +116,36 @@ export default class TCRClient extends BaseClient {
     }))
   }
 
+  async getEntriesQL(): Promise<Entry[]> {
+    // TODO : add filter
+    const { tcr } = await InternalUtils.graphqlRequest(
+      `{
+        tcr(address:"${this.tcrAddress}") {
+          entries {
+            dataHash
+            proposer {
+              address
+            }
+            deposit
+            listAt
+            proposedAt
+            status
+          }
+        }
+      }`,
+    )
+    return tcr
+      ? tcr.entries.map((entry: any) => ({
+          dataHash: entry.dataHash,
+          proposer: entry.proposer.address,
+          deposit: new BN(entry.deposit),
+          listAt: entry.listAt,
+          proposedAt: entry.proposedAt,
+          status: entry.status,
+        }))
+      : []
+  }
+
   async getChallenges(args: {
     challenger?: Address
     challengeIds?: number[]
@@ -148,8 +178,74 @@ export default class TCRClient extends BaseClient {
     })
   }
 
+  async getChallengesQL() {
+    // TODO : add filter
+    const { tcr } = await InternalUtils.graphqlRequest(
+      `{
+        tcr(address:"${this.tcrAddress}") {
+          challenges {
+            onChainId
+            entry {
+              dataHash
+            }
+            challenger {
+              address
+            }
+            stake
+            reasonHash
+            tx {
+              blockTimestamp
+            }
+            poll {
+              ... on CommitRevealPoll {
+                commitEndTime
+                revealEndTime
+              }
+              voteMinParticipation
+              voteSupportRequired
+              yesWeight
+              noWeight
+              status
+            }
+            rewardPool
+            leaderReward
+          }
+        }
+      }`,
+    )
+    return tcr
+      ? tcr.challenges.map((challenge: any) => ({
+          challengeId: challenge.onChainId,
+          entryHash: challenge.entry.dataHash,
+          challenger: challenge.challenger.address,
+          stake: new BN(challenge.stake),
+          reasonData: challenge.reasonHash,
+          challengeAt: challenge.tx.blockTimestamp,
+          commitEndTime: challenge.poll.commitEndTime,
+          revealEndTime: challenge.poll.revealEndTime,
+          minParticipation: new BN(challenge.poll.voteMinParticipation),
+          supportRequiredPct: challenge.poll.voteSupportRequired,
+          currentYesVote: new BN(challenge.poll.yesWeight),
+          currentNoVote: new BN(challenge.poll.noWeight),
+          currentParticipation: new BN(challenge.poll.yesWeight).add(
+            new BN(challenge.poll.noWeight),
+          ),
+          status: challenge.status,
+          voterReward: new BN(challenge.rewardPool).sub(
+            new BN(challenge.leaderReward),
+          ),
+          leaderReward: new BN(challenge.leaderReward),
+        }))
+      : []
+  }
+
   async getVotes(args: { voter?: Address; challengeIds?: number[] }) {
     return await this.voteClient.getVotes(args.voter, args.challengeIds)
+  }
+
+  async getVotesQL(args: { voter?: Address; challengeIds?: number[] }) {
+    // TODO : add filter
+    return await this.voteClient.getVotesQL(args.voter, args.challengeIds)
   }
 
   async getEntryHistory(args: { entryHash?: string }) {
@@ -160,6 +256,51 @@ export default class TCRClient extends BaseClient {
     }))
   }
 
+  async getEntryHistoryQL() {
+    // TODO : add filter
+    const { tcr } = await InternalUtils.graphqlRequest(
+      `{
+        tcr(address:"${this.tcrAddress}") {
+          entries {
+            dataHash
+            entryHistory {
+              proposer {
+                address
+              }
+              tx {
+                blockTimestamp
+                txHash
+              }
+              depositChanged
+              action
+            }
+          }
+        }
+      }
+      `,
+    )
+    return tcr
+      ? tcr.entries.reduce((acc: any, entry: any) => {
+          return acc.concat(
+            entry.entryHistory
+              .filter((history: any) => {
+                return history.proposer && history.tx
+              })
+              .map((history: any) => {
+                return {
+                  type: history.action,
+                  timestamp: history.tx.blockTimestamp,
+                  txHash: history.tx.txHash,
+                  entryHash: entry.dataHash,
+                  depositChanged: new BN(history.depositChanged),
+                  actor: history.proposer.address,
+                }
+              }),
+          )
+        }, [])
+      : []
+  }
+
   async getVotingPower(challengeId: number) {
     return await this.voteClient.getVotingPower(challengeId)
   }
@@ -167,6 +308,24 @@ export default class TCRClient extends BaseClient {
   async getMinDeposit(entryHash: string): Promise<BN> {
     return new BN(
       (await this.getRequestTCR(`/${entryHash}/min-deposit`, {})).minDeposit,
+    )
+  }
+
+  async getMinDepositQL(entryHash: string) {
+    const { tcr } = await InternalUtils.graphqlRequest(
+      `{
+        tcr(address:"${this.tcrAddress}") {
+          entries {
+            dataHash
+            currentMinDeposit
+          }
+        }
+      }`,
+    )
+    return new BN(
+      tcr.entries.filter(
+        (entry: any) => entry.dataHash === entryHash,
+      )[0].currentMinDeposit,
     )
   }
 

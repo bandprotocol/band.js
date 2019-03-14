@@ -81,6 +81,46 @@ export default class VoteClient extends BaseClient {
     }))
   }
 
+  async getVotesQL(voter?: Address, pollIds?: number[]): Promise<Vote[]> {
+    // TODO : add filter
+    console.log(voter, pollIds)
+    const { tcr } = await InternalUtils.graphqlRequest(
+      `
+      {
+        tcr(address:"${this.sendAddress}") {
+          challenges {
+            onChainId
+            poll {
+              votes {
+                voter {
+                  address
+                }
+                totalWeight
+                yesWeight
+                noWeight
+              }
+            }
+          }
+        }
+      }
+    `,
+    )
+    let { challenges } = tcr
+    return challenges.reduce(
+      (acc: any, challenge: any) =>
+        acc.concat(
+          challenge.poll.votes.map((vote: any) => ({
+            onChainId: challenge.onChainId,
+            voter: vote.voter.address,
+            totalWeight: vote.totalWeight,
+            yesWeight: vote.yesWeight,
+            noWeight: vote.noWeight,
+          })),
+        ),
+      [],
+    )
+  }
+
   async getVotingPower(pollId: number): Promise<BN> {
     const result = await this.getRequestVote(
       `/${pollId}/voting-power/${await this.getAccount()}`,
