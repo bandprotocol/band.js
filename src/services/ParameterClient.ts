@@ -48,11 +48,16 @@ export default class ParameterClient extends BaseClient {
     }))
   }
 
-  async createProposalTransaction(keys: string[], values: (string | BN)[]) {
+  async createProposalTransaction(
+    reasonHash: string,
+    keys: string[],
+    values: (string | BN)[],
+  ) {
     const { to: tokenAddress, data, nonce } = await this.postRequestParameter(
       '/proposals',
       {
         sender: await this.getAccount(),
+        reasonHash,
         keys,
         values: values.map((e: string | BN) => (BN.isBN(e) ? e.toString() : e)),
       },

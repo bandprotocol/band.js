@@ -60,6 +60,7 @@ export interface Parameter {
 
 export interface Proposal {
   proposalId: number
+  reasonHash: string
   proposer: Address
   changes: Parameter[]
   yesVote: BN
@@ -127,6 +128,6 @@ export interface EntryEvent {
   type: string
   timestamp: Time
   depositChanged: BN
-  proposer?: Address
+  actor?: Address
   txHash?: string
 }
