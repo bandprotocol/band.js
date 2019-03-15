@@ -110,6 +110,10 @@ export default class ParameterClient extends BaseClient {
     }))
   }
 
+  async getVotes(args: { voter?: Address; proposalIds?: number[] }) {
+    return await this.voteClient.getVotes(args.voter, args.proposalIds)
+  }
+
   //TODO: recheck it
   async getVoteResultProposals(): Promise<VoteResult[]> {
     const account = await this.getAccount()

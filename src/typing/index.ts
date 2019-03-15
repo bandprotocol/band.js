@@ -127,7 +127,7 @@ export interface Vote {
   commitHash: string
   yesWeight: BN
   noWeight: BN
-  onchainId: number
+  onChainId: number
   claimed?: boolean
 }
 
