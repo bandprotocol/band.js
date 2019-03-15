@@ -161,7 +161,9 @@ export default class TCRClient extends BaseClient {
         ...e,
         stake: new BN(e.stake),
         minParticipation: new BN(e.minParticipation),
+        supportRequiredPct: new BN(e.supportRequiredPct),
         currentParticipation: new BN(e.currentParticipation),
+        totalVotingPower: new BN(e.totalVotingPower),
         currentYesVote: new BN(e.currentYesVote),
         currentNoVote: new BN(e.currentNoVote),
       }

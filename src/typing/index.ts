@@ -69,9 +69,14 @@ export interface Proposal {
   proposalId: number
   reasonHash: string
   proposer: Address
+  proposedAt: Time
+  pollEndTime: Time
   changes: Parameter[]
   yesVote: BN
   noVote: BN
+  minParticipation: BN
+  supportRequiredPct: BN
+  totalVotingPower: BN
 }
 
 export interface VoteResult {
@@ -115,6 +120,7 @@ export interface Challenge {
   minParticipation: BN
   supportRequiredPct: BN
   currentParticipation: BN
+  totalVotingPower: BN
   currentYesVote: BN
   currentNoVote: BN
   voterReward?: BN

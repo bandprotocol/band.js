@@ -64,6 +64,9 @@ export default class ParameterClient extends BaseClient {
       })),
       yesVote: new BN(e.yesVote),
       noVote: new BN(e.noVote),
+      minParticipation: new BN(e.minParticipation),
+      supportRequiredPct: new BN(e.supportRequiredPct),
+      totalVotingPower: new BN(e.totalVotingPower),
     }))
   }
 
@@ -112,6 +115,10 @@ export default class ParameterClient extends BaseClient {
 
   async getVotes(args: { voter?: Address; proposalIds?: number[] }) {
     return await this.voteClient.getVotes(args.voter, args.proposalIds)
+  }
+
+  async getVotingPower(proposalId: number) {
+    return await this.voteClient.getVotingPower(proposalId)
   }
 
   //TODO: recheck it
