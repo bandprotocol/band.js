@@ -61,10 +61,27 @@ console.log(
 
   console.log('test ipfs')
 
-  const test = await IPFS.set('this is my community website')
-  console.log(test)
-  const getTest = await IPFS.get(test)
-  console.log(getTest)
+  const logo = 'https://bandprotocol.com/static/media/logo.99f03541.svg'
+  const description = `In this series of articles,
+  we investigate the short selling in Bonding Curves and introduce our design to show how it works.
+  It is worth mentioning that this work is originally inspired by our discussion with Paul Kohlhaas and Gonzalo Sainz Trápaga from Molecule,
+  but the solution represents our internal research at Ocean Protocol.`
+
+  const website = 'https://bandprotocol.com/'
+  const author = 'Julia Scarlett Elizabeth Louis-Dreyfus'
+
+  const values = [
+    await IPFS.set(logo),
+    await IPFS.set(description),
+    await IPFS.set(website),
+    await IPFS.set(author),
+  ]
+
+  console.log(values)
+
+  for (const v of values) {
+    console.log(await IPFS.get(v))
+  }
 
   console.log(
     '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- END TEST BANDPROTOCOL CLIENT',

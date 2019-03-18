@@ -144,32 +144,8 @@ export default class CommunityClient extends BaseClient {
     })
   }
 
-  async reportDetail({
-    name,
-    symbol,
-    logo,
-    description,
-    website,
-    author,
-    collateralEquation,
-  }: {
-    name: string
-    symbol: string
-    logo: string
-    description: string
-    website: string
-    author: string
-    collateralEquation: Equation
-  }) {
-    await this.postRequestDApps(`/detail`, {
-      name,
-      symbol,
-      logo,
-      description,
-      website,
-      author,
-      collateralEquation,
-    })
+  async reportDetail({ collateralEquation }: { collateralEquation: Equation }) {
+    await this.postRequestDApps(`/detail`, { collateralEquation })
   }
 
   async createTransferTransaction(to: Address, value: string | BN) {

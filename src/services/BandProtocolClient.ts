@@ -4,6 +4,7 @@ import Web3 from 'web3'
 import BaseClient from './BaseClient'
 import CommunityClient from './CommunityClient'
 import InternalUtils from './InternalUtils'
+import IPFS from './IPFS'
 import { Address, Equation, BandInfo, DappInfo } from '../typing/index'
 
 /**
@@ -104,8 +105,18 @@ export default class BandProtocolClient extends BaseClient {
       symbol,
       decimal: 18,
       voting,
-      keys,
-      values,
+      keys: keys.concat([
+        'info:logo',
+        'info:description',
+        'info:website',
+        'info:author',
+      ]),
+      values: values.concat([
+        await IPFS.set(logo),
+        await IPFS.set(description),
+        await IPFS.set(website),
+        await IPFS.set(author),
+      ]),
       collateralEquation,
     })
     const tx = await this.createTransaction(to, data, false)
@@ -119,15 +130,7 @@ export default class BandProtocolClient extends BaseClient {
       : InternalUtils.throw("Transaction's logs is invalid.")
     const coreAddress = '0x' + chunk.slice(218, 258)
     const communityClient = await this.at(coreAddress)
-    await communityClient.reportDetail({
-      name,
-      symbol,
-      logo,
-      description,
-      website,
-      author,
-      collateralEquation,
-    })
+    await communityClient.reportDetail({ collateralEquation })
     return communityClient
   }
 
