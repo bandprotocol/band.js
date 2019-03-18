@@ -1,8 +1,8 @@
 import Web3 from 'web3'
-const Web3Legacy = require('web3-legacy')
 import Qs from 'qs'
 import axios from 'axios'
 import { JsonResponse, GQLResponse, Address } from '../typing'
+const Web3Legacy = require('web3-legacy')
 
 export default class InternalUtils {
   static API = 'https://api.bandprotocol.com'

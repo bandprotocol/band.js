@@ -8,3 +8,5 @@
 /example
 /test/config-private.ts
 .vscode
+*.js
+*.log

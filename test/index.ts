@@ -1,14 +1,13 @@
-import { BandProtocolClient } from '../src'
+import { BandProtocolClient, IPFS } from '../src'
 // import * as Seed from './Seed.json'
 import config from './config-private'
 import Web3 from 'web3'
-import InternalUtils from '../src/services/InternalUtils'
+
 // import BN from 'bn.js'
 
 const ipc = config.gethConnection + 'geth.ipc'
 const provider = new Web3.providers.IpcProvider(ipc, require('net'))
 BandProtocolClient.setAPI('https://api-wip.rinkeby.bandprotocol.com')
-
 // Band Test
 ;(async () => {
   // const bandClient = await BandProtocolClient.make({
@@ -59,237 +58,18 @@ console.log(
   }
 
   console.log('unlock')
-  await (async () => {
-    console.log('-=-=-=-=-=-=-=-=-=-=-=-=- getBandInfo')
-    const info = await bandClient.getBandInfo()
-    const infoQL = await bandClient.getBandInfoQL()
-    console.log(info)
-    console.log(infoQL)
-    console.log(JSON.stringify(info) === JSON.stringify(infoQL))
-  })()
-  await (async () => {
-    console.log('-=-=-=-=-=-=-=-=-=-=-=-=- getDAppsInfo')
-    const info = await bandClient.getDAppsInfo()
-    const infoQL = await bandClient.getDAppsInfoQL()
-    console.log(info)
-    console.log(infoQL)
-    for (let i = 0; i < info.length; i++) {
-      console.log(info[i].address === infoQL[i].address)
-      console.log(info[i].name === infoQL[i].name)
-    }
-  })()
-  await (async () => {
-    console.log('-=-=-=-=-=-=-=-=-=-=-=-=- at')
-    const info = await bandClient.at(
-      '0x74f5F574ADB023aC74fa19Ca3694046faB62D475',
-    )
-    const infoQL = await bandClient.atQL(
-      '0x74f5F574ADB023aC74fa19Ca3694046faB62D475',
-    )
-    console.log(
-      InternalUtils.circularStringify(info) ===
-        InternalUtils.circularStringify(infoQL),
-    )
-  })()
 
-  await (async () => {
-    console.log('-=-=-=-=-=-=-=-=-=-=-=-=- getBalance')
-    const info = await bandClient.getBalance()
-    const infoQL = await bandClient.getBalanceQL()
-    console.log(info.toString())
-    console.log(infoQL.toString())
-    console.log(info.toString() === infoQL.toString())
-  })()
+  console.log('test ipfs')
+
+  const test = await IPFS.set('this is my community website')
+  console.log(test)
+  const getTest = await IPFS.get(test)
+  console.log(getTest)
 
   console.log(
     '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- END TEST BANDPROTOCOL CLIENT',
   )
 
-  console.log(
-    '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- BEGIN TEST COMMUNITY CLIENT',
-  )
-
-  const commObj = await bandClient.atQL(
-    '0x3838057cdeC5d3B5b47C006A00A2AE97909D48F2',
-  )
-
-  await (async () => {
-    console.log('-=-=-=-=-=-=-=-=-=-=-=-=- getBalance')
-    const info = await commObj.getBalance()
-    const infoQL = await commObj.getBalanceQL()
-    console.log(info.toString())
-    console.log(infoQL.toString())
-    console.log(info.toString() === infoQL.toString())
-  })()
-
-  await (async () => {
-    console.log('-=-=-=-=-=-=-=-=-=-=-=-=- getOrderHistory')
-    console.log('ALL -=-=-=-=-=-=-=')
-    console.log(await commObj.getOrderHistory({}))
-    console.log(await commObj.getOrderHistoryQL({}))
-    console.log('BUY -=-=-=-=-=-=-=')
-    console.log(await commObj.getOrderHistory({ type: 'buy' }))
-    console.log(await commObj.getOrderHistoryQL({ type: 'BUY' }))
-    console.log('SELL -=-=-=-=-=-=-=')
-    console.log(await commObj.getOrderHistory({ type: 'sell' }))
-    console.log(await commObj.getOrderHistoryQL({ type: 'SELL' }))
-    //console.log(info.toString() === infoQL.toString())
-  })()
-
-  await (async () => {
-    console.log('-=-=-=-=-=-=-=-=-=-=-=-=- getPriceHistory')
-    console.log(await commObj.getPriceHistory({}))
-    console.log(await commObj.getPriceHistoryQL())
-  })()
-
-  console.log(
-    '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- END TEST COMMUNITY CLIENT',
-  )
-
-  console.log(
-    '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- BEGIN TEST PARAMETER CLIENT',
-  )
-
-  const gcComm = await bandClient.atQL(
-    '0x74f5F574ADB023aC74fa19Ca3694046faB62D475',
-  )
-
-  const paramObj = gcComm.parameter()
-
-  await (async () => {
-    console.log('-=-=-=-=-=-=-=-=-=-=-=-=- getParameters')
-    const kvs1 = await paramObj.getParameters()
-    const kvs2 = await paramObj.getParametersQL()
-    console.log(kvs1.length === kvs2.length)
-    const tmp: any = {}
-    for (let i = 0; i < kvs1.length; i++) {
-      if (!tmp[kvs1[i].key]) {
-        tmp[kvs1[i].key] = [kvs1[i].value]
-      } else {
-        tmp[kvs1[i].key] = tmp[kvs1[i].key].concat([kvs1[i].value])
-      }
-      if (!tmp[kvs2[i].key]) {
-        tmp[kvs2[i].key] = [kvs2[i].value]
-      } else {
-        tmp[kvs2[i].key] = tmp[kvs2[i].key].concat([kvs2[i].value])
-      }
-    }
-    console.log(tmp)
-  })()
-
-  await (async () => {
-    console.log('-=-=-=-=-=-=-=-=-=-=-=-=- getProposals')
-    const kvs1: any = await paramObj.getProposals()
-    const kvs2: any = await paramObj.getProposalsQL()
-    console.log(kvs1.length === kvs2.length)
-    for (let i = 0; i < kvs1.length; i++) {
-      const tmp: any = {}
-      const k1: any = Object.keys(kvs1[i])
-      const k2: any = Object.keys(kvs2[i])
-      console.log(k1.length === k2.length)
-      for (let j = 0; j < k1.length; j++) {
-        tmp[k1[j]] = [kvs1[i][k1[j]], kvs2[i][k1[j]]]
-      }
-      console.log(tmp)
-    }
-  })()
-
-  console.log(
-    '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- END TEST PARAMETER CLIENT',
-  )
-
-  console.log(
-    '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- BEGIN TEST TCR CLIENT',
-  )
-
-  const tcrObj = commObj.tcr('0x1f69eea176033444028502dd1c3fef3529a499d4')
-
-  await (async () => {
-    console.log('-=-=-=-=-=-=-=-=-=-=-=-=- getEntries')
-    const entries1 = await tcrObj.getEntries({})
-    const entries2 = await tcrObj.getEntriesQL()
-    console.log(entries1.length === entries2.length)
-    const tmp: any = {}
-    for (const entry of entries1) {
-      tmp[entry.dataHash] = [entry]
-    }
-    for (const entry of entries2) {
-      tmp[entry.dataHash] = [entry].concat(tmp[entry.dataHash])
-    }
-    console.log(tmp)
-  })()
-
-  await (async () => {
-    console.log('-=-=-=-=-=-=-=-=-=-=-=-=- getChallenges')
-    const cs1 = await tcrObj.getChallenges({})
-    const cs2 = await tcrObj.getChallengesQL()
-    console.log(cs1.length === cs2.length)
-    const tmp: any = {}
-    for (const c of cs1) {
-      tmp[c.entryHash + c.challengeId] = [c]
-    }
-    for (const c of cs2) {
-      tmp[c.entryHash + c.challengeId] = [c].concat(
-        tmp[c.entryHash + c.challengeId],
-      )
-    }
-    console.log(tmp)
-  })()
-
-  await (async () => {
-    console.log('-=-=-=-=-=-=-=-=-=-=-=-=- getEntryHistory')
-    const history1 = await tcrObj.getEntryHistory({})
-    const history2 = await tcrObj.getEntryHistoryQL()
-    console.log(history1.length === history2.length)
-    const tmp: any = {}
-    for (const h of history1) {
-      tmp[h.txHash] = [h]
-    }
-    for (const h of history2) {
-      tmp[h.txHash] = [h].concat(tmp[h.txHash])
-    }
-    console.log(tmp)
-  })()
-
-  await (async () => {
-    console.log('-=-=-=-=-=-=-=-=-=-=-=-=- getMinDeposit')
-    console.log(
-      await tcrObj.getMinDeposit(
-        '0xf61b770a4077dfb2a52da1600bdda41ea8bfec682c0b5fce85e80ce530790912',
-      ),
-    )
-    console.log(
-      await tcrObj.getMinDepositQL(
-        '0xf61b770a4077dfb2a52da1600bdda41ea8bfec682c0b5fce85e80ce530790912',
-      ),
-    )
-  })()
-
-  console.log(
-    '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- END TEST TCR CLIENT',
-  )
-
-  console.log(
-    '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- BEGIN TEST Vote CLIENT',
-  )
-
-  await (async () => {
-    console.log('-=-=-=-=-=-=-=-=-=-=-=-=- getVotes')
-    console.log(
-      await tcrObj.getVotes({
-        voter: '0x4aEa6CfC5BD14F2308954D544e1DC905268357DB',
-      }),
-    )
-    console.log(
-      await tcrObj.getVotesQL({
-        voter: '0x4aEa6CfC5BD14F2308954D544e1DC905268357DB',
-      }),
-    )
-  })()
-
-  console.log(
-    '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- END TEST Vote CLIENT',
-  )
   // axios({
   //   url: 'https://api-wip.rinkeby.bandprotocol.com/graphql',
   //   method: 'post',
@@ -475,7 +255,6 @@ console.log(
   // console.log(await entryExitTx.send())
   //   console.log('ending', new BN(''))
   // }
-  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
 })()
 // ;(async () => {
 //   const bandClient = await BandProtocolClient.make({
