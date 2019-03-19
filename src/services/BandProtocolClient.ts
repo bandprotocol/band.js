@@ -51,14 +51,49 @@ export default class BandProtocolClient extends BaseClient {
     return { ...band, price: 1.03, last24Hrs: 6.28 }
   }
 
-  async getDAppsInfo(): Promise<DappInfo[]> {
+  async getDAppsInfo(): Promise<any> {
     const { dapps } = await InternalUtils.getRequest('/dapps')
-    return dapps.map((e: any) => ({
-      ...e,
-      marketCap: parseFloat(e.marketCap),
-      price: parseFloat(e.price),
-      last24Hrs: parseFloat(e.last24Hrs),
-    }))
+    return Promise.all(
+      dapps.map(async (e: any) => {
+        const { community } = await InternalUtils.graphqlRequest(
+          `{
+          community(address:"${e.address}") {
+            config {
+              subConfigs {
+                prefix
+                keyValues {
+                  key
+                  value
+                }
+              }
+            }
+          }
+        }`,
+        )
+        const { subConfigs } = community.config
+        const infos = subConfigs.filter(
+          (subConfig: any) => subConfig.prefix === 'info',
+        )
+        const infoObj: any = {}
+        if (infos.length > 0) {
+          const kvs = infos[0].keyValues
+          await Promise.all(
+            kvs.map(async (kv: any) => {
+              infoObj[kv.key.slice(5)] = await IPFS.get(
+                '0x' + new BN(kv.value).toString(16),
+              )
+            }),
+          )
+        }
+        return {
+          ...e,
+          ...infoObj,
+          marketCap: parseFloat(e.marketCap),
+          price: parseFloat(e.price),
+          last24Hrs: parseFloat(e.last24Hrs),
+        }
+      }),
+    )
   }
 
   async getDAppsInfoQL(): Promise<DappInfo[]> {

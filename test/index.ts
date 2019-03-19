@@ -84,8 +84,12 @@ console.log(
   }
 
   console.log(
-    '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- END TEST BANDPROTOCOL CLIENT',
+    '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- TEST DAPP INFO',
   )
+
+  console.log(await bandClient.getDAppsInfo())
+
+  console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- END')
 
   // axios({
   //   url: 'https://api-wip.rinkeby.bandprotocol.com/graphql',
