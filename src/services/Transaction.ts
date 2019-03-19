@@ -26,6 +26,14 @@ export default class Transaction {
     this.nonce = nonce
   }
 
+  getTxDetail() {
+    return {
+      sender: this.sender,
+      to: this.to,
+      data: this.data,
+    }
+  }
+
   send() {
     return this.web3.eth.sendTransaction({
       from: this.sender,

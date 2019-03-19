@@ -89,6 +89,17 @@ console.log(
 
   console.log(await bandClient.getDAppsInfo())
 
+  const comm = await bandClient.at('0x3838057cdeC5d3B5b47C006A00A2AE97909D48F2')
+  const tcr = comm.tcr('0x1F69eEA176033444028502Dd1c3Fef3529A499D4')
+
+  const txn = await tcr.createCommitVoteTransaction(
+    1,
+    '0x6fea37016b2a2edb6f59fb9cd992084f1948cdd71f470036f62f6ef52bcf6626',
+    '100',
+  )
+
+  console.log(txn.getTxDetail())
+
   console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- END')
 
   // axios({

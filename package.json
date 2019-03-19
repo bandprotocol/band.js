@@ -1,6 +1,6 @@
 {
   "name": "band.js",
-  "version": "1.0.52",
+  "version": "1.0.55",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
