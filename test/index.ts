@@ -1,4 +1,4 @@
-import { BandProtocolClient, IPFS } from '../src'
+import { BandProtocolClient, IPFS, Utils } from '../src'
 // import * as Seed from './Seed.json'
 import config from './config-private'
 import Web3 from 'web3'
@@ -43,11 +43,12 @@ console.log(
   const bandClient = await BandProtocolClient.make({
     provider: provider,
   })
+  let accountAddress = '-'
   if (bandClient !== undefined) {
     console.log(config)
     const web3: Web3 = new Web3(provider)
     // console.log(await bandClient.getNetworkType())
-    const accountAddress = (await web3.eth.getAccounts())[0]
+    accountAddress = (await web3.eth.getAccounts())[0]
     console.log(accountAddress)
     console.log((await bandClient.getBalance()).toString())
     await web3.eth.personal.unlockAccount(
@@ -87,8 +88,6 @@ console.log(
     '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- TEST DAPP INFO',
   )
 
-  console.log(await bandClient.getDAppsInfo())
-
   const comm = await bandClient.at('0x3838057cdeC5d3B5b47C006A00A2AE97909D48F2')
   const tcr = comm.tcr('0x1F69eEA176033444028502Dd1c3Fef3529A499D4')
 
@@ -99,6 +98,32 @@ console.log(
   )
 
   console.log(txn.getTxDetail())
+
+  const {
+    tcr: { entries },
+  } = await Utils.graphqlRequest(`
+  {
+    tcr(address:"0x1F69eEA176033444028502Dd1c3Fef3529A499D4") {
+      entries {
+        dataHash
+        deposit
+        currentMinDeposit
+        listAt
+        proposedAt
+        proposer {
+          address
+        }
+        status
+      }
+    }
+  }`)
+
+  const myEntries = entries.filter(
+    (entry: any) => entry.proposer.address === accountAddress,
+  )
+
+  console.log(myEntries)
+  console.log(myEntries.length)
 
   console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- END')
 
