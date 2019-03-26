@@ -5,13 +5,7 @@ import BaseClient from './BaseClient'
 import ParameterClient from './ParameterClient'
 import TCRClient from './TCRClient'
 import InternalUtils from './InternalUtils'
-import {
-  OrderHistory,
-  Address,
-  Equation,
-  PriceHistory,
-  RewardDetail,
-} from '../typing'
+import { OrderHistory, Address, PriceHistory, RewardDetail } from '../typing'
 
 export default class CommunityClient extends BaseClient {
   private coreAddress: Address
@@ -142,10 +136,6 @@ export default class CommunityClient extends BaseClient {
         price: history.price,
       }
     })
-  }
-
-  async reportDetail({ collateralEquation }: { collateralEquation: Equation }) {
-    await this.postRequestDApps(`/detail`, { collateralEquation })
   }
 
   async createTransferTransaction(to: Address, value: string | BN) {
