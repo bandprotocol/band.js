@@ -4,7 +4,6 @@ import BN from 'bn.js'
  * alias
  */
 export type Address = string
-export type Equation = string
 export type Time = string
 
 /**

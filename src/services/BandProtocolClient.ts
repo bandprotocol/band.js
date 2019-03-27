@@ -5,7 +5,7 @@ import BaseClient from './BaseClient'
 import CommunityClient from './CommunityClient'
 import InternalUtils from './InternalUtils'
 import IPFS from './IPFS'
-import { Address, Equation, BandInfo, DappInfo } from '../typing/index'
+import { Address, BandInfo, DappInfo } from '../typing/index'
 
 /**
  * This is class for get balance and transfer BandToken.
@@ -133,7 +133,7 @@ export default class BandProtocolClient extends BaseClient {
     voting: Address,
     keys: string[],
     values: (string | number)[],
-    collateralEquation: Equation,
+    collateralEquation: (string | BN)[],
   ) {
     const { to, data } = await this.postRequestBand('/create-dapp', {
       name,
@@ -155,18 +155,7 @@ export default class BandProtocolClient extends BaseClient {
       collateralEquation,
     })
     const tx = await this.createTransaction(to, data, false)
-    const { logs } = await tx.send()
-    // const { logs } = await (await this.createTransaction(
-    //   to,
-    //   data,
-    // )).sendAndWait6Confirmations()
-    const chunk = logs
-      ? logs[logs.length - 1].data
-      : InternalUtils.throw("Transaction's logs is invalid.")
-    const coreAddress = '0x' + chunk.slice(218, 258)
-    const communityClient = await this.at(coreAddress)
-    await communityClient.reportDetail({ collateralEquation })
-    return communityClient
+    await tx.send()
   }
 
   /**
