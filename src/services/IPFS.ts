@@ -1,26 +1,32 @@
-const _IPFS = require('nano-ipfs-store')
+const _IPFS = require('ipfs-mini')
 const bs58 = require('bs58')
 
 export default class IPFS {
-  static ipfs = _IPFS.at('https://ipfs.bandprotocol.com')
+  static ipfs = new _IPFS({
+    host: 'ipfs.infura.io',
+    port: 5001,
+    protocol: 'https',
+  })
 
   static async get(dataHash: string) {
-    const bytes = Buffer.from('01551220' + dataHash.slice(2), 'hex')
-    const cid = 'z' + bs58.encode(bytes)
-    return await this.ipfs.cat(cid)
+    const cid = bs58.encode(Buffer.from('1220' + dataHash.slice(2), 'hex'))
+    let result = null
+    try {
+      result = await this.ipfs.cat(cid)
+    } catch (e) {
+      console.log('error')
+      console.log(cid)
+    }
+    return result
   }
 
   static async set(data: string) {
     const cid = await this.ipfs.add(data)
-    if (cid.slice(0, 1) !== 'z')
+    const cidHex = bs58.decode(cid).toString('hex')
+    if (cidHex.slice(0, 4) !== '1220')
       throw new Error(
-        `Invalid IPFS hash format: '${cid}' Expect the first character to be 'z'`,
+        `Invalid IPFS hash format: '${cid}' Expect the first character to be '1220'`,
       )
-    const dataHash = bs58.decode(cid.slice(1)).toString('hex')
-    if (dataHash.slice(0, 8) !== '01551220')
-      throw new Error(
-        `Invalid IPFS hash base58 encoded prefix: ${dataHash}. Expect first 8 characters to be '01551220'`,
-      )
-    return '0x' + dataHash.slice(8)
+    return '0x' + cidHex.slice(4)
   }
 }

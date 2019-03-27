@@ -1,4 +1,4 @@
-import { BandProtocolClient, IPFS, Utils } from '../src'
+import { BandProtocolClient, IPFS } from '../src'
 // import * as Seed from './Seed.json'
 import config from './config-private'
 import Web3 from 'web3'
@@ -84,46 +84,46 @@ console.log(
     console.log(await IPFS.get(v))
   }
 
-  console.log(
-    '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- TEST DAPP INFO',
-  )
+  // console.log(
+  //   '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- TEST DAPP INFO',
+  // )
 
-  const comm = await bandClient.at('0x3838057cdeC5d3B5b47C006A00A2AE97909D48F2')
-  const tcr = comm.tcr('0x1F69eEA176033444028502Dd1c3Fef3529A499D4')
+  // const comm = await bandClient.at('0x3838057cdeC5d3B5b47C006A00A2AE97909D48F2')
+  // const tcr = comm.tcr('0x1F69eEA176033444028502Dd1c3Fef3529A499D4')
 
-  const txn = await tcr.createCommitVoteTransaction(
-    1,
-    '0x6fea37016b2a2edb6f59fb9cd992084f1948cdd71f470036f62f6ef52bcf6626',
-    '100',
-  )
+  // const txn = await tcr.createCommitVoteTransaction(
+  //   1,
+  //   '0x6fea37016b2a2edb6f59fb9cd992084f1948cdd71f470036f62f6ef52bcf6626',
+  //   '100',
+  // )
 
-  console.log(txn.getTxDetail())
+  // console.log(txn.getTxDetail())
 
-  const {
-    tcr: { entries },
-  } = await Utils.graphqlRequest(`
-  {
-    tcr(address:"0x1F69eEA176033444028502Dd1c3Fef3529A499D4") {
-      entries {
-        dataHash
-        deposit
-        currentMinDeposit
-        listAt
-        proposedAt
-        proposer {
-          address
-        }
-        status
-      }
-    }
-  }`)
+  // const {
+  //   tcr: { entries },
+  // } = await Utils.graphqlRequest(`
+  // {
+  //   tcr(address:"0x1F69eEA176033444028502Dd1c3Fef3529A499D4") {
+  //     entries {
+  //       dataHash
+  //       deposit
+  //       currentMinDeposit
+  //       listAt
+  //       proposedAt
+  //       proposer {
+  //         address
+  //       }
+  //       status
+  //     }
+  //   }
+  // }`)
 
-  const myEntries = entries.filter(
-    (entry: any) => entry.proposer.address === accountAddress,
-  )
+  // const myEntries = entries.filter(
+  //   (entry: any) => entry.proposer.address === accountAddress,
+  // )
 
-  console.log(myEntries)
-  console.log(myEntries.length)
+  // console.log(myEntries)
+  // console.log(myEntries.length)
 
   console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- END')
 

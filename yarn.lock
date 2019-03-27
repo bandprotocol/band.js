@@ -1191,6 +1191,13 @@ ipaddr.js@1.8.0:
   resolved "https://registry.yarnpkg.com/ipaddr.js/-/ipaddr.js-1.8.0.tgz#eaa33d6ddd7ace8f7f6fe0c9ca0440e706738b1e"
   integrity sha1-6qM9bd16zo9/b+DJygRA5wZzix4=
 
+ipfs-mini@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/ipfs-mini/-/ipfs-mini-1.1.5.tgz#1ffd1f0b048814aabbdfa24c77cde255c5b11fc7"
+  integrity sha512-BzsoCa3V/gxN2eEHnyqggOdreAwnvbddj4jUvp6Q7jXuzXx9q5XakXe8mG8qV0bn4bMKdH/7BUDbiWBCEMuYBg==
+  dependencies:
+    xmlhttprequest "^1.8.0"
+
 is-buffer@^1.1.5:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/is-buffer/-/is-buffer-1.1.6.tgz#efaa2ea9daa0d7ab2ea13a97b2b8ad51fefbe8be"
@@ -1489,23 +1496,10 @@ nan@^2.0.8, nan@^2.3.3:
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.12.1.tgz#7b1aa193e9aa86057e3c7bbd0ac448e770925552"
   integrity sha512-JY7V6lRkStKcKTvHO5NVSQRv+RV+FIL5pvDoLiAtSL9pKlC5x9PKQcZDsq7m4FO4d57mkhC6Z+QhAh3Jdk5JFw==
 
-nano-ipfs-store@^0.1.3:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/nano-ipfs-store/-/nano-ipfs-store-0.1.3.tgz#36bd08d7c3c9d6b199ebab6531190b1b1029772e"
-  integrity sha512-QlFPtHXBWzysxVL5HlefyjNpRFfZh24VoQ1XxeHfYc+M9s/y0QBEzsQlWio0GHQaKp1lDJagATwwZfKFq3NwXA==
-  dependencies:
-    nano-sha256 "^0.1.2"
-    xmlhttprequest "^1.8.0"
-
 nano-json-stream-parser@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/nano-json-stream-parser/-/nano-json-stream-parser-0.1.2.tgz#0cc8f6d0e2b622b479c40d499c46d64b755c6f5f"
   integrity sha1-DMj20OK2IrR5xA1JnEbWS3Vcb18=
-
-nano-sha256@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/nano-sha256/-/nano-sha256-0.1.2.tgz#d4fe35ce45621c4d2c33c7fa2601e8ed6ff55700"
-  integrity sha512-O84Y3Qx6UPRNGSApxHQ2xtp3xHOOhYK99JQaJ2phanHIA/JTIEJLvzV6bUwzVz2k3nFwEOfaqzgpUH8QME1BzA==
 
 negotiator@0.6.1:
   version "0.6.1"
