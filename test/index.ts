@@ -62,7 +62,13 @@ console.log(
 
   console.log('test ipfs')
 
-  const logo = 'https://bandprotocol.com/static/media/logo.99f03541.svg'
+  const logo = IPFS.toHexString(
+    'QmWMzNc956YNJH6xCzyjzV5b99y4mX9NAPxXTHZrKYr3nn',
+  )
+
+  // const banner = IPFS.toHexString(
+  //   'QmRZ2bQE1XWwkL2YwUNEVSZqPkHsLNGUYFCVhqAxPXHBBA',
+  // )
   const description = `In this series of articles,
   we investigate the short selling in Bonding Curves and introduce our design to show how it works.
   It is worth mentioning that this work is originally inspired by our discussion with Paul Kohlhaas and Gonzalo Sainz Trápaga from Molecule,
@@ -72,7 +78,7 @@ console.log(
   const author = 'Julia Scarlett Elizabeth Louis-Dreyfus'
 
   const values = [
-    await IPFS.set(logo),
+    logo,
     await IPFS.set(description),
     await IPFS.set(website),
     await IPFS.set(author),
@@ -142,48 +148,66 @@ console.log(
   // })
 
   // console.log(response.data.result)
+
   // const x: any = await bandClient.deployCommunity(
-  //   'HazardApp',
-  //   'HZC',
-  //   'https://i.imgur.com/FApqk3D.jpg',
-  //   'D Day',
-  //   'https://NewBandApp.com',
-  //   'Umbrella Cooperation',
-  //   'x * ((2* x / 2000000000000000000000000000000000000) ^ 2) * curve / 1000000000000',
-  //   '0x8fAcfD1352EBc1F8Bb49d6C557609Ac35177d046',
+  //   'New IPFS Community',
+  //   'NIC',
+  //   logo,
+  //   banner,
+  //   'IPFS startwith Qm',
+  //   'https://bandprotocol.com',
+  //   'Band protocol',
+  //   '0xc36D339F7C1Fb31AFcFa117C9F67d9b57568A970',
   //   [
-  //     'core:admin_contract',
-  //     'core:reward_period',
-  //     'core:reward_edit_period',
   //     'params:expiration_time',
   //     'params:support_required_pct',
   //     'params:min_participation_pct',
-  //     'admin:min_deposit',
-  //     'admin:apply_stage_length',
-  //     'admin:support_required_pct',
-  //     'admin:min_participation_pct',
-  //     'admin:commit_time',
-  //     'admin:reveal_time',
-  //     'admin:reward_percentage',
+  //     'tcr:min_deposit',
+  //     'tcr:apply_stage_length',
+  //     'tcr:support_required_pct',
+  //     'tcr:min_participation_pct',
+  //     'tcr:commit_time',
+  //     'tcr:reveal_time',
+  //     'tcr:dispensation_percentage',
   //   ],
   //   [
-  //     '287919152008616205050887182337219248835982180233',
-  //     '120',
-  //     '120',
   //     '300',
-  //     '70',
-  //     '10',
-  //     '100',
-  //     '60',
-  //     '50',
-  //     '10',
-  //     '60',
-  //     '60',
-  //     '50',
+  //     '700000000000000000',
+  //     '100000000000000000',
+  //     '100000000000000000000',
+  //     '120',
+  //     '500000000000000000',
+  //     '100000000000000000',
+  //     '120',
+  //     '120',
+  //     '500000000000000000',
   //   ],
-  //   '(x^2/2000000000000000000000000000000000000)^2',
+  //   [
+  //     '18',
+  //     '12',
+  //     '1',
+  //     '0',
+  //     '20358132124461740000000',
+  //     '7',
+  //     '6',
+  //     '0',
+  //     '12499999999999894000',
+  //     '1',
+  //     '0',
+  //     '20358132124461740000000',
+  //     '20',
+  //     '0',
+  //     '12499999999999894000',
+  //     '1',
+  //     '0',
+  //     '20358132124461740000000',
+  //     '0',
+  //     '3000000',
+  //   ],
   // )
   // console.log(x)
+
+  console.log(await bandClient.getDAppsInfo())
   // const XCHClient = await bandClient.at(
   //   '0xA624312D6b733855548bd3F4901D9b6aC465e0Dc',
   // )

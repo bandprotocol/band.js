@@ -1,6 +1,6 @@
 {
   "name": "band.js",
-  "version": "1.0.59",
+  "version": "1.0.60",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
@@ -20,6 +20,7 @@
     "axios": "^0.18.0",
     "bignumber.js": "^8.0.1",
     "bs58": "^4.0.1",
+    "ipfs-http-client": "^30.1.0",
     "ipfs-mini": "^1.1.5",
     "qs": "^6.6.0",
     "typescript": "^3.1.6",

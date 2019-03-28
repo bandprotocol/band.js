@@ -1,4 +1,6 @@
 const _IPFS = require('ipfs-mini')
+const ipfsClient = require('ipfs-http-client')
+
 const bs58 = require('bs58')
 
 export default class IPFS {
@@ -8,24 +10,41 @@ export default class IPFS {
     protocol: 'https',
   })
 
-  static async get(dataHash: string) {
-    const cid = bs58.encode(Buffer.from('1220' + dataHash.slice(2), 'hex'))
-    let result = null
+  static ipfsImg = ipfsClient({
+    host: 'ipfs.infura.io',
+    port: 5001,
+    protocol: 'https',
+  })
+
+  static async get(hexString: string) {
+    const cid = IPFS.toIPFSHash(hexString)
     try {
-      result = await this.ipfs.cat(cid)
+      return await IPFS.ipfs.cat(cid)
     } catch (e) {
-      console.log('error')
-      console.log(cid)
+      console.log('error', cid)
+      return null
     }
-    return result
   }
 
   static async set(data: string) {
-    const cid = await this.ipfs.add(data)
-    const cidHex = bs58.decode(cid).toString('hex')
+    const cid = await IPFS.ipfs.add(data)
+    return IPFS.toHexString(cid)
+  }
+
+  static async uploadImageToIPFS(dataBytes: Uint8Array[]) {
+    const [{ hash }] = await IPFS.ipfsImg.add(Buffer.from(dataBytes))
+    return IPFS.toHexString(hash)
+  }
+
+  static toIPFSHash(hexString: string) {
+    return bs58.encode(Buffer.from('1220' + hexString.slice(2), 'hex'))
+  }
+
+  static toHexString(ipfsHash: string) {
+    const cidHex = bs58.decode(ipfsHash).toString('hex')
     if (cidHex.slice(0, 4) !== '1220')
       throw new Error(
-        `Invalid IPFS hash format: '${cid}' Expect the first character to be '1220'`,
+        `Invalid IPFS hash format: '${ipfsHash}' Expect the first character to be '1220'`,
       )
     return '0x' + cidHex.slice(4)
   }

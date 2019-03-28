@@ -77,14 +77,20 @@ export default class BandProtocolClient extends BaseClient {
         const infoObj: any = {}
         if (infos.length > 0) {
           const kvs = infos[0].keyValues
-          await Promise.all(
-            kvs.map(async (kv: any) => {
-              infoObj[kv.key.slice(5)] = await IPFS.get(
+          for (const kv of kvs) {
+            const name = kv.key.slice(5)
+            if (name === 'logo' || name === 'banner') {
+              infoObj[name] = IPFS.toIPFSHash(
                 '0x' + new BN(kv.value).toString(16),
               )
-            }),
-          )
+            } else {
+              infoObj[name] = await IPFS.get(
+                '0x' + new BN(kv.value).toString(16),
+              )
+            }
+          }
         }
+
         return {
           ...e,
           ...infoObj,
@@ -127,9 +133,10 @@ export default class BandProtocolClient extends BaseClient {
     name: string,
     symbol: string,
     logo: string,
+    banner: string,
     description: string,
     website: string,
-    author: string,
+    organization: string,
     voting: Address,
     keys: string[],
     values: (string | number)[],
@@ -142,15 +149,17 @@ export default class BandProtocolClient extends BaseClient {
       voting,
       keys: keys.concat([
         'info:logo',
+        'info:banner',
         'info:description',
         'info:website',
-        'info:author',
+        'info:organization',
       ]),
       values: values.concat([
-        await IPFS.set(logo),
+        logo,
+        banner,
         await IPFS.set(description),
         await IPFS.set(website),
-        await IPFS.set(author),
+        await IPFS.set(organization),
       ]),
       collateralEquation,
     })
