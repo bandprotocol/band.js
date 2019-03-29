@@ -1,7 +1,8 @@
 const _IPFS = require('ipfs-mini')
 const ipfsClient = require('ipfs-http-client')
-
 const bs58 = require('bs58')
+
+import Utils from './Utils'
 
 export default class IPFS {
   static ipfs = new _IPFS({
@@ -37,7 +38,11 @@ export default class IPFS {
   }
 
   static toIPFSHash(hexString: string) {
-    return bs58.encode(Buffer.from('1220' + hexString.slice(2), 'hex'))
+    const hexStringNo0x = hexString.startsWith('0x')
+      ? hexString.slice(2)
+      : hexString
+    const padedHexString = Utils.opad64(hexStringNo0x)
+    return bs58.encode(Buffer.from('1220' + padedHexString, 'hex'))
   }
 
   static toHexString(ipfsHash: string) {

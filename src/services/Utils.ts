@@ -3,6 +3,14 @@ import BN from 'bn.js'
 import InternalUtils from './InternalUtils'
 
 export default class Utils {
+  static opad64(x: string): string {
+    return x.length < 64 ? this.pado64('0' + x) : x
+  }
+
+  static pado64(x: string): string {
+    return x.length < 64 ? this.pado64(x + '0') : x
+  }
+
   static fromBlockchainUnit(value: BN): number {
     return new BigNumber(value.toString()).div(new BigNumber(1e18)).toNumber()
   }
