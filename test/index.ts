@@ -90,6 +90,14 @@ console.log(
     console.log(await IPFS.get(v))
   }
 
+  const valNo0x = values.slice(1).map(v => v.substr(2))
+  console.log(valNo0x)
+
+  for (const v of valNo0x) {
+    console.log(v)
+    console.log(await IPFS.get(v))
+  }
+
   // console.log(
   //   '-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- TEST DAPP INFO',
   // )
