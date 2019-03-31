@@ -66,15 +66,9 @@ export default class InternalUtils {
     return data
   }
 
-  static async signMessage(
-    externalWeb3: Web3,
-    message: string,
-    sender: Address,
-  ) {
+  static async signMessage(web3: Web3, message: string, sender: Address) {
     try {
-      const web3 = new Web3(externalWeb3.currentProvider)
-      console.log('tet', web3.eth.personal.sign)
-      return await (web3.eth.personal.sign as any)(message, sender)
+      return await (web3.eth.personal.sign as any)(message, sender, '')
     } catch {
       console.log('Cannot sign by legacy web3')
       return this.throw('Cannot sign a message')
