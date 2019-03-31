@@ -1,6 +1,6 @@
 {
   "name": "band.js",
-  "version": "1.0.60",
+  "version": "1.0.62",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
@@ -24,8 +24,7 @@
     "ipfs-mini": "^1.1.5",
     "qs": "^6.6.0",
     "typescript": "^3.1.6",
-    "web3": "1.0.0-beta.36",
-    "web3-legacy": "npm:web3@0.20.3"
+    "web3": "1.0.0-beta.51"
   },
   "devDependencies": {
     "@types/web3": "1.0.18",

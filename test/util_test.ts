@@ -1,6 +1,8 @@
-import { Utils, IPFS } from '../src'
-// import InternalUtils from '../src/services/InternalUtils'
+import { BandProtocolClient, Utils, IPFS } from '../src'
+import InternalUtils from '../src/services/InternalUtils'
+import config from './config-private'
 import BN from 'bn.js'
+import Web3 from 'web3'
 ;(async () => {
   console.log(Utils.fromBlockchainUnit(new BN('543210000056123456')))
   console.log(Utils.toBlockchainUnit(12.6).toString())
@@ -39,4 +41,30 @@ import BN from 'bn.js'
   console.log(await IPFS.get('0x' + b10.toString(16)))
 
   // console.log(InternalUtils())
+})()
+
+const ipc = config.gethConnection + 'geth.ipc'
+const provider = new Web3.providers.IpcProvider(ipc, require('net'))
+BandProtocolClient.setAPI('https://api-wip.rinkeby.bandprotocol.com')
+;(async () => {
+  const bandClient = await BandProtocolClient.make({
+    provider: provider,
+  })
+  if (bandClient !== undefined) {
+    console.log(config)
+    const web3: Web3 = new Web3(provider)
+    // console.log(await bandClient.getNetworkType())
+    const accountAddress = (await web3.eth.getAccounts())[0]
+    console.log(accountAddress)
+    console.log((await bandClient.getBalance()).toString())
+    await web3.eth.personal.unlockAccount(
+      accountAddress,
+      config.accountPassword,
+      500,
+    )
+
+    console.log(web3.currentProvider)
+
+    console.log(await InternalUtils.signMessage(web3, 'bun', accountAddress))
+  }
 })()
