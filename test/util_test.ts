@@ -66,5 +66,13 @@ BandProtocolClient.setAPI('https://api-wip.rinkeby.bandprotocol.com')
     console.log(web3.currentProvider)
 
     console.log(await InternalUtils.signMessage(web3, 'bun', accountAddress))
+
+    console.log(
+      await web3.eth.sendTransaction({
+        from: accountAddress,
+        to: '0x85109F11A7E1385ee826FbF5dA97bB97dba0D76f',
+        value: '1',
+      }),
+    )
   }
 })()

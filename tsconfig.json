@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "esModuleInterop": true,
-    "lib": ["es2015", "dom"],
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "declarationDir": "./dist",
+    "module": "es6",
+    "noImplicitAny": true,
+    "outDir": "./dist",
     "target": "es5",
-    "outDir": "./lib",
-    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "strinct": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },

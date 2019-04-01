@@ -1,18 +1,20 @@
 {
   "name": "band.js",
   "version": "1.0.64",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.es.js",
+  "types": "dist/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
-    "clear": "rm -rf ./lib",
-    "dev": "yarn clear && tsc && node lib/test/index.js",
+    "build": "rollup -c",
+    "watch": "rollup -cw",
+    "clear": "rm -rf ./dist",
+    "dev": "yarn clear && tsc && node dist/test/index.js",
     "prepare": "npm run build",
     "doc": "typedoc --out doc/ src/ --module commonjs --target es2017 && open doc/index.html"
   },
   "files": [
-    "lib/**/*"
+    "dist"
   ],
   "author": "BandProcotol",
   "dependencies": {
@@ -22,12 +24,15 @@
     "bs58": "^4.0.1",
     "ipfs-http-client": "^30.1.0",
     "ipfs-mini": "^1.1.5",
+    "koa": "^2.7.0",
     "qs": "^6.6.0",
-    "typescript": "^3.1.6",
+    "typescript": "^3.4.1",
     "web3": "1.0.0-beta.51"
   },
   "devDependencies": {
     "@types/web3": "1.0.18",
+    "rollup": "^1.7.4",
+    "rollup-plugin-typescript2": "^0.20.1",
     "ts-node": "^7.0.1",
     "typedoc": "^0.14.0"
   },
