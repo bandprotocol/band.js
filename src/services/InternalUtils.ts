@@ -2,7 +2,6 @@ import Web3 from 'web3'
 import Qs from 'qs'
 import axios from 'axios'
 import { JsonResponse, GQLResponse, Address } from '../typing'
-const Web3Legacy = require('web3-legacy')
 
 export default class InternalUtils {
   static API = 'https://api.bandprotocol.com'
@@ -69,13 +68,7 @@ export default class InternalUtils {
 
   static async signMessage(web3: Web3, message: string, sender: Address) {
     try {
-      const oldWeb3 = new Web3Legacy(web3.currentProvider)
-      return new Promise<string>((resolve, reject) => {
-        oldWeb3.personal.sign(message, sender, function(err: any, signed: any) {
-          if (err !== null) reject(err)
-          else resolve(signed)
-        })
-      })
+      return await (web3.eth.personal.sign as any)(message, sender, '')
     } catch {
       console.log('Cannot sign by legacy web3')
       return this.throw('Cannot sign a message')
