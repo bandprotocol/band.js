@@ -1,10 +1,6 @@
 {
   "name": "band.js",
-<<<<<<< HEAD
-  "version": "1.0.61",
-=======
   "version": "1.0.64",
->>>>>>> 92a98280955858fd7b2258d1d3ffb6226bc7118a
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
