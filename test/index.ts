@@ -1,8 +1,7 @@
-import { BandProtocolClient, IPFS } from '../src'
+import { BandProtocolClient, IPFS, Utils } from '../src'
 // import * as Seed from './Seed.json'
 import config from './config-private'
 import Web3 from 'web3'
-
 // import BN from 'bn.js'
 
 const ipc = config.gethConnection + 'geth.ipc'
@@ -65,6 +64,27 @@ console.log(
   const logo = IPFS.toHexString(
     'QmWMzNc956YNJH6xCzyjzV5b99y4mX9NAPxXTHZrKYr3nn',
   )
+
+  const testTokens = await Utils.graphqlRequest(
+    `
+    {
+      allTokens {
+        nodes {
+          address
+          symbol
+          name
+        }
+      }
+    }
+    `,
+  )
+
+  console.log(testTokens)
+  const {
+    allTokens: { nodes },
+  } = testTokens
+  console.log(nodes)
+  console.log('-=-=-=-=-=-=-=-=-=')
 
   // const banner = IPFS.toHexString(
   //   'QmRZ2bQE1XWwkL2YwUNEVSZqPkHsLNGUYFCVhqAxPXHBBA',

@@ -5,6 +5,7 @@ import { JsonResponse, GQLResponse, Address } from '../typing'
 
 export default class InternalUtils {
   static API = 'https://api.bandprotocol.com'
+  static Graphql = 'https://graphql.bandprotocol.com/graphql'
 
   static throw(m: string): never {
     throw new Error(m)
@@ -55,8 +56,7 @@ export default class InternalUtils {
   }
 
   static async graphqlRequest(query: any): Promise<any> {
-    const url = InternalUtils.API + '/graphql'
-    const response = await axios.post<GQLResponse>(url, {
+    const response = await axios.post<GQLResponse>(InternalUtils.Graphql, {
       query: query,
     })
     if (response.status !== 200) {
