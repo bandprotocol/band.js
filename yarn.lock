@@ -638,7 +638,7 @@ concat-map@0.0.1:
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
   integrity sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=
 
-"concat-stream@github:hugomrdias/concat-stream#feat/smaller":
+concat-stream@hugomrdias/concat-stream#feat/smaller:
   version "2.0.0"
   resolved "https://codeload.github.com/hugomrdias/concat-stream/tar.gz/057bc7b5d6d8df26c8cf00a3f151b6721a0a8034"
   dependencies:
@@ -2519,7 +2519,7 @@ nanomatch@^1.2.9:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
-"ndjson@github:hugomrdias/ndjson#feat/readable-stream3":
+ndjson@hugomrdias/ndjson#feat/readable-stream3:
   version "1.5.0"
   resolved "https://codeload.github.com/hugomrdias/ndjson/tar.gz/4db16da6b42e5b39bf300c3a7cde62abb3fa3a11"
   dependencies:

@@ -1,11 +1,10 @@
 import Web3 from 'web3'
-import Qs from 'qs'
 import axios from 'axios'
 import { JsonResponse, GQLResponse, Address } from '../typing'
 
 export default class InternalUtils {
-  static API = 'https://api.bandprotocol.com'
-  static Graphql = 'https://graphql.bandprotocol.com/graphql'
+  static API = 'https://bandapi-v2.herokuapp.com'
+  static GRAPH_QL_API = 'https://graphql.bandprotocol.com/graphql'
 
   static throw(m: string): never {
     throw new Error(m)
@@ -35,11 +34,7 @@ export default class InternalUtils {
 
   static async getRequest(path: string, params?: any): Promise<any> {
     const url = InternalUtils.API + path
-    const listAxios = axios.create({
-      paramsSerializer: params =>
-        Qs.stringify(params, { arrayFormat: 'repeat' }),
-    })
-    const response = await listAxios.get<JsonResponse>(url, { params })
+    const response = await axios.get<JsonResponse>(url, { params })
     if (response.data.message !== undefined) {
       throw new Error(response.data.message)
     }
@@ -56,7 +51,7 @@ export default class InternalUtils {
   }
 
   static async graphqlRequest(query: any): Promise<any> {
-    const response = await axios.post<GQLResponse>(InternalUtils.Graphql, {
+    const response = await axios.post<GQLResponse>(InternalUtils.GRAPH_QL_API, {
       query: query,
     })
     if (response.status !== 200) {
@@ -70,7 +65,7 @@ export default class InternalUtils {
     try {
       return await (web3.eth.personal.sign as any)(message, sender, '')
     } catch {
-      console.log('Cannot sign by legacy web3')
+      console.log('Cannot sign by web3')
       return this.throw('Cannot sign a message')
     }
   }

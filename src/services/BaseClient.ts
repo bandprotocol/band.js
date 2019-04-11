@@ -37,24 +37,5 @@ export default class BaseClient {
       return InternalUtils.throw('Required provider.')
     const sender = await this.getAccount()
     return new Transaction(this.web3, sender, to, data, isFeelessable, nonce)
-
-    // sendAndWait6Confirmations: () => {
-    //   if (this.web3 === undefined) return InternalUtils.throw('Required provider.')
-    //   const promi = this.web3.eth.sendTransaction({
-    //     from,
-    //     to,
-    //     data,
-    //   })
-    //   return new Promise<TransactionReceipt>((resolve, reject) => {
-    //     promi
-    //       .on('confirmation', (confNumber, receipt) => {
-    //         if (confNumber === 6) {
-    //           return resolve(receipt)
-    //         }
-    //       })
-    //       .on('error', error => reject(error))
-    //   })
-    // },
-    //   }
   }
 }

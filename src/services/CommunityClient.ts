@@ -5,7 +5,8 @@ import BaseClient from './BaseClient'
 import ParameterClient from './ParameterClient'
 import TCRClient from './TCRClient'
 import InternalUtils from './InternalUtils'
-import { OrderHistory, Address, PriceHistory, RewardDetail } from '../typing'
+import IPFS from './IPFS'
+import { Address } from '../typing'
 
 export default class CommunityClient extends BaseClient {
   private coreAddress: Address
@@ -13,31 +14,6 @@ export default class CommunityClient extends BaseClient {
   constructor(coreAddress: Address, web3?: Web3) {
     super(web3)
     this.coreAddress = coreAddress
-  }
-
-  async getBalance(): Promise<BN> {
-    const account = await this.getAccount()
-    const result = await this.getRequestDApps(`/balance/${account}`)
-    return new BN(result.balance)
-  }
-
-  async getBalanceQL(): Promise<BN> {
-    const account = await this.getAccount()
-    const { community } = await InternalUtils.graphqlRequest(
-      `{
-        community(address: "${this.coreAddress}") {
-          token {
-            balances(filteredBy:{
-              users:["${account}"]
-            }) {
-              value
-            }
-          }
-        }
-      }
-    `,
-    )
-    return community.token.balances[0].value
   }
 
   async getBuyPrice(amount: string | BN): Promise<BN> {
@@ -50,92 +26,6 @@ export default class CommunityClient extends BaseClient {
     const amountString = BN.isBN(amount) ? amount.toString() : amount
     const url = `/sell-price/${amountString}`
     return new BN((await this.getRequestDApps(url)).price)
-  }
-
-  async getOrderHistory(args: {
-    limit?: number
-    user?: Address
-    type?: 'buy' | 'sell'
-  }): Promise<OrderHistory[]> {
-    const result: any[] = await this.getRequestDApps('/order-history', args)
-    return result.map((e: OrderHistory) => ({
-      ...e,
-      value: new BN(e.value),
-      price: new BN(e.price),
-    }))
-  }
-
-  async getOrderHistoryQL(args: {
-    user?: Address
-    type?: 'BUY' | 'SELL'
-  }): Promise<OrderHistory[]> {
-    // TODO : add limit filter
-    const { user, type } = args
-    const { community } = await InternalUtils.graphqlRequest(
-      `
-      {
-        community(address: "${this.coreAddress}") {
-          orderHistory(filteredBy:{
-            ${(() => (user ? `users: [${user}],` : ``))()}
-            ${(() => (type ? `orderTypes: [${type}],` : ``))()}
-          }) {
-            orderType
-            user {
-              address
-            }
-            value
-            price
-            tx {
-              blockTimestamp
-              txHash
-            }
-          }
-        }
-      }`,
-    )
-    const { orderHistory } = community
-    return orderHistory.map((history: any) => {
-      return {
-        orderType: history.orderType,
-        ...history.user,
-        value: new BN(history.value),
-        price: new BN(history.price),
-        blockTime: history.tx.blockTimestamp,
-        txHash: history.tx.txHash,
-      }
-    })
-  }
-
-  async getPriceHistory(args: { limit?: number }): Promise<PriceHistory[]> {
-    const result: any[] = await this.getRequestDApps('/price-history', args)
-    return result.map((e: any) => ({
-      time: e.time,
-      price: parseFloat(e.price),
-    }))
-  }
-
-  async getPriceHistoryQL(): Promise<PriceHistory[]> {
-    // TODO : add limit filter
-    const { community } = await InternalUtils.graphqlRequest(
-      `{
-        community(address: "${this.coreAddress}") {
-          priceHistory {
-            price
-            tx {
-              blockTimestamp
-            }
-          }
-        }
-      }
-      `,
-    )
-    const { priceHistory } = community
-    return priceHistory.map((history: any) => {
-      return {
-        time: history.tx.blockTimestamp,
-        price: history.price,
-      }
-    })
   }
 
   async createTransferTransaction(to: Address, value: string | BN) {
@@ -183,116 +73,132 @@ export default class CommunityClient extends BaseClient {
     return this.createTransaction(tokenAddress, data, true, nonce)
   }
 
-  async createNewRewardTransaction(
-    keys: Address[],
-    values: number[],
-    imageLink: string,
-    detailLink: string,
-    header: string,
-    period: string,
+  async deployTCR(
+    prefix: string,
+    params: object,
+    minDepositEquation: (string | BN)[],
   ) {
-    const { rootHash } = await this.postRequestMerkle('', {
-      keys,
-      values,
-    })
-
-    const { to: tokenAddress, data } = await this.postRequestDApps(
-      '/add-reward',
+    prefix += ':'
+    const { allContracts } = await InternalUtils.graphqlRequest(
+      `
       {
-        rootHash: rootHash,
-        totalPortion: _.sum(values),
-      },
+        allContracts(condition: {contractType: "CR_VOTING"}) {
+          nodes {
+            address
+          }
+        }
+      }`,
     )
-    const tx = await this.createTransaction(tokenAddress, data, false)
-    const { logs } = await tx.send()
-    if (!logs) return
-    const rewardId = parseInt(logs[0].topics[1] as any) // TODO: Figure out why topics[1] can be string[]
-
-    await this.reportRewardDetail({
-      imageLink,
-      detailLink,
-      header,
-      period,
-      rewardId,
+    const voting = allContracts.nodes[0].address
+    const { to, data } = await this.postRequestDApps('/create-tcr', {
+      prefix,
+      voting,
+      minDepositEquation,
     })
-  }
-
-  async reportRewardDetail({
-    imageLink,
-    detailLink,
-    header,
-    period,
-    rewardId,
-  }: {
-    imageLink: string
-    detailLink: string
-    header: string
-    period: string
-    rewardId: number
-  }) {
-    await this.postRequestDApps(`/rewards/${rewardId}/detail`, {
-      imageLink,
-      detailLink,
-      header,
-      period,
-    })
-  }
-
-  async createClaimRewardTransaction(rewardId: number) {
-    const { rootHash } = await this.getRewardDetail(rewardId)
-    const account = await this.getAccount()
-    const proof = await this.getRequestMerkle(`/${rootHash}/proof/${account}`)
-    const kvs = await this.getRequestMerkle(`/${rootHash}`, {
-      key: account,
-    })
-    if (kvs.length === 0) {
-      InternalUtils.throw('Reward not found')
-    }
-    const { to: tokenAddress, data } = await this.postRequestDApps(`/rewards`, {
-      rewardId,
-      beneficiary: account,
-      rewardPortion: kvs[0].value,
-      proof,
-    })
-    return this.createTransaction(tokenAddress, data, false)
-  }
-
-  async getRewardDetail(rewardId: number): Promise<RewardDetail> {
-    const rewards = await this.getRequestDApps(`/rewards`)
-    return rewards.filter((reward: any) => reward.rewardId === rewardId)[0]
-  }
-
-  async getRewards(): Promise<RewardDetail[]> {
-    const rawRewards: RewardDetail[] = await this.getRequestDApps(`/rewards`)
-    const rewards = rawRewards.map((reward: RewardDetail) => ({
-      ...reward,
-      totalReward: new BN(reward.totalReward),
-      totalPortion: new BN(reward.totalPortion),
-    }))
-    if (!this.isLogin()) return rewards
-    const user = await this.getAccount()
-    for (const reward of rewards) {
-      const claim = await this.getRequestDApps(
-        `/rewards/${reward.rewardId}/claim/${user}`,
-      )
-      if (claim.claimed) {
-        reward.claimed = true
-        reward.amount = new BN(claim.amount)
-      } else {
-        const kvs = await this.getRequestMerkle(`/${reward.rootHash}`, {
-          key: user,
+    const tx = await this.createTransaction(to, data, false)
+    await new Promise((resolve, reject) =>
+      tx.send().on('receipt', async receipt => {
+        if (!receipt.logs) {
+          reject()
+          return
+        }
+        const tcrAddress = receipt.logs && receipt.logs[0].data.slice(0, 66)
+        console.log(tcrAddress)
+        const parameterClient = this.parameter()
+        const paramTx = await parameterClient.createProposalTransaction(
+          await IPFS.set(
+            JSON.stringify({
+              title: `Initialize parameter for tcr with prefix ${prefix}`,
+              reason: `Initialize parameter for new tcr address ${'0x' +
+                tcrAddress.slice(26)}.`,
+            }),
+          ),
+          [
+            ...Object.keys(params).map(key => prefix + key),
+            `${prefix}tcr_address`,
+          ],
+          [...Object.values(params), tcrAddress],
+        )
+        paramTx.send().on('receipt', _ => {
+          resolve('0x' + tcrAddress.slice(26))
         })
-        reward.claimed = false
-        reward.amount =
-          kvs.length === 0
-            ? new BN(0)
-            : new BN(kvs[0].value)
-                .mul(reward.totalReward)
-                .div(reward.totalPortion)
-      }
-    }
-    return rewards
+      }),
+    )
   }
+
+  // async createNewRewardTransaction(
+  //   keys: Address[],
+  //   values: number[],
+  //   imageLink: string,
+  //   detailLink: string,
+  //   header: string,
+  //   period: string,
+  // ) {
+  //   const { rootHash } = await this.postRequestMerkle('', {
+  //     keys,
+  //     values,
+  //   })
+
+  //   const { to: tokenAddress, data } = await this.postRequestDApps(
+  //     '/add-reward',
+  //     {
+  //       rootHash: rootHash,
+  //       totalPortion: _.sum(values),
+  //     },
+  //   )
+  //   const tx = await this.createTransaction(tokenAddress, data, false)
+  //   const { logs } = await tx.send()
+  //   if (!logs) return
+  //   const rewardId = parseInt(logs[0].topics[1] as any) // TODO: Figure out why topics[1] can be string[]
+
+  //   await this.reportRewardDetail({
+  //     imageLink,
+  //     detailLink,
+  //     header,
+  //     period,
+  //     rewardId,
+  //   })
+  // }
+
+  // async reportRewardDetail({
+  //   imageLink,
+  //   detailLink,
+  //   header,
+  //   period,
+  //   rewardId,
+  // }: {
+  //   imageLink: string
+  //   detailLink: string
+  //   header: string
+  //   period: string
+  //   rewardId: number
+  // }) {
+  //   await this.postRequestDApps(`/rewards/${rewardId}/detail`, {
+  //     imageLink,
+  //     detailLink,
+  //     header,
+  //     period,
+  //   })
+  // }
+
+  // async createClaimRewardTransaction(rewardId: number) {
+  //   const { rootHash } = await this.getRewardDetail(rewardId)
+  //   const account = await this.getAccount()
+  //   const proof = await this.getRequestMerkle(`/${rootHash}/proof/${account}`)
+  //   const kvs = await this.getRequestMerkle(`/${rootHash}`, {
+  //     key: account,
+  //   })
+  //   if (kvs.length === 0) {
+  //     InternalUtils.throw('Reward not found')
+  //   }
+  //   const { to: tokenAddress, data } = await this.postRequestDApps(`/rewards`, {
+  //     rewardId,
+  //     beneficiary: account,
+  //     rewardPortion: kvs[0].value,
+  //     proof,
+  //   })
+  //   return this.createTransaction(tokenAddress, data, false)
+  // }
 
   parameter() {
     return new ParameterClient(this.coreAddress, this.web3)
@@ -314,10 +220,10 @@ export default class CommunityClient extends BaseClient {
       data,
     )
   }
-  private async getRequestMerkle(path: string, params?: any): Promise<any> {
-    return await InternalUtils.getRequest(`/merkle${path}`, params)
-  }
-  private async postRequestMerkle(path: string, data: any): Promise<any> {
-    return await InternalUtils.postRequest(`/merkle${path}`, data)
-  }
+  // private async getRequestMerkle(path: string, params?: any): Promise<any> {
+  //   return await InternalUtils.getRequest(`/merkle${path}`, params)
+  // }
+  // private async postRequestMerkle(path: string, data: any): Promise<any> {
+  //   return await InternalUtils.postRequest(`/merkle${path}`, data)
+  // }
 }
