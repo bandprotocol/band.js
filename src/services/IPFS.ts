@@ -6,14 +6,14 @@ import Utils from './Utils'
 
 export default class IPFS {
   static ipfs = new _IPFS({
-    host: 'ipfs.infura.io',
-    port: 5001,
+    host: 'ipfs.bandprotocol.com',
+    port: 443,
     protocol: 'https',
   })
 
   static ipfsImg = ipfsClient({
-    host: 'ipfs.infura.io',
-    port: 5001,
+    host: 'ipfs.bandprotocol.com',
+    port: 443,
     protocol: 'https',
   })
 

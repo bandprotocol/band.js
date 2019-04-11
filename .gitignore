@@ -9,5 +9,5 @@
 /.rpt2_cache
 /test/config-private.ts
 .vscode
-*.js
+/!*.js
 *.log
