@@ -17,18 +17,22 @@ export default class IPFS {
     protocol: 'https',
   })
 
-  static async get(hexString: string) {
+  static async get(hexString: string, isJSON = false) {
     const cid = IPFS.toIPFSHash(hexString)
     try {
-      return await IPFS.ipfs.cat(cid)
+      if (isJSON) return await IPFS.ipfs.catJSON(cid)
+      else return await IPFS.ipfs.cat(cid)
     } catch (e) {
       console.log('error', cid)
       return null
     }
   }
 
-  static async set(data: string) {
-    const cid = await IPFS.ipfs.add(data)
+  static async set(data: string | JSON) {
+    const cid =
+      typeof data === 'string'
+        ? await IPFS.ipfs.add(data)
+        : await IPFS.ipfs.addJSON(data)
     return IPFS.toHexString(cid)
   }
 
