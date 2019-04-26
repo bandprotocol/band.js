@@ -1,12 +1,13 @@
 import _ from 'lodash'
 import Web3 from 'web3'
 import BN from 'bn.js'
+import delay from 'delay'
 import BaseClient from './BaseClient'
 import ParameterClient from './ParameterClient'
 import TCRClient from './TCRClient'
 import InternalUtils from './InternalUtils'
-import IPFS from './IPFS'
-import { Address } from '../typing'
+import TCDClient from './TCDClient'
+import { Address, SendToken, BuySellType, ParameterProposal, CastVote, TCRDetail, TCDDetail } from '../typing/index'
 
 export default class CommunityClient extends BaseClient {
   private coreAddress: Address
@@ -28,7 +29,7 @@ export default class CommunityClient extends BaseClient {
     return new BN((await this.getRequestDApps(url)).price)
   }
 
-  async createTransferTransaction(to: Address, value: string | BN) {
+  async createTransferTransaction({ to, value }: SendToken) {
     const valueString = BN.isBN(value) ? value.toString() : value
     const { to: tokenAddress, data, nonce } = await this.postRequestDApps(
       '/transfer',
@@ -41,7 +42,7 @@ export default class CommunityClient extends BaseClient {
     return this.createTransaction(tokenAddress, data, true, nonce)
   }
 
-  async createBuyTransaction(amount: string | BN, priceLimit: string | BN) {
+  async createBuyTransaction({ amount, priceLimit }: BuySellType) {
     const amountString = BN.isBN(amount) ? amount.toString() : amount
     const priceLimitString = BN.isBN(priceLimit)
       ? priceLimit.toString()
@@ -57,7 +58,7 @@ export default class CommunityClient extends BaseClient {
     return this.createTransaction(tokenAddress, data, true, nonce)
   }
 
-  async createSellTransaction(amount: string | BN, priceLimit: string | BN) {
+  async createSellTransaction({ amount, priceLimit }: BuySellType) {
     const amountString = BN.isBN(amount) ? amount.toString() : amount
     const priceLimitString = BN.isBN(priceLimit)
       ? priceLimit.toString()
@@ -73,132 +74,103 @@ export default class CommunityClient extends BaseClient {
     return this.createTransaction(tokenAddress, data, true, nonce)
   }
 
-  async deployTCR(
-    prefix: string,
-    params: object,
-    minDepositEquation: (string | BN)[],
+  async createProposeTransaction({ reasonHash, keys, values }: ParameterProposal) {
+    return this.parameter().createProposalTransaction(reasonHash, keys, values)
+  }
+
+  async createProposalVoteTransaction({ proposalId, yesVote, noVote }: CastVote) {
+    return this.parameter().createCastVoteTransaction(proposalId, yesVote, noVote)
+  }
+
+  async createTCR({
+    prefix,
+    decayFunction,
+    minDeposit,
+    applyStageLength,
+    dispensationPercentage,
+    commitTime,
+    revealTime,
+    minParticipationPct,
+    supportRequiredPct }: TCRDetail
   ) {
     prefix += ':'
-    const { allContracts } = await InternalUtils.graphqlRequest(
-      `
-      {
-        allContracts(condition: {contractType: "CR_VOTING"}) {
-          nodes {
-            address
-          }
-        }
-      }`,
-    )
-    const voting = allContracts.nodes[0].address
     const { to, data } = await this.postRequestDApps('/create-tcr', {
       prefix,
-      voting,
-      minDepositEquation,
+      decayFunction,
+      minDeposit,
+      applyStageLength,
+      dispensationPercentage,
+      commitTime,
+      revealTime,
+      minParticipationPct,
+      supportRequiredPct
     })
     const tx = await this.createTransaction(to, data, false)
-    await new Promise((resolve, reject) =>
-      tx.send().on('receipt', async receipt => {
-        if (!receipt.logs) {
+    return new Promise<TCRClient>((resolve, reject) =>
+      tx.send().on('transactionHash', async tx_hash => {
+        if (!this.web3) {
           reject()
           return
         }
-        const tcrAddress = receipt.logs && receipt.logs[0].data.slice(0, 66)
-        console.log(tcrAddress)
-        const parameterClient = this.parameter()
-        const paramTx = await parameterClient.createProposalTransaction(
-          await IPFS.set(
-            JSON.stringify({
-              title: `Initialize parameter for tcr with prefix ${prefix}`,
-              reason: `Initialize parameter for new tcr address ${'0x' +
-                tcrAddress.slice(26)}.`,
-            }),
-          ),
-          [
-            ...Object.keys(params).map(key => prefix + key),
-            `${prefix}tcr_address`,
-          ],
-          [...Object.values(params), tcrAddress],
-        )
-        paramTx.send().on('receipt', _ => {
-          resolve('0x' + tcrAddress.slice(26))
-        })
-      }),
+        while (true) {
+          const log = await this.web3.eth.getTransactionReceipt(tx_hash)
+          console.log(log)
+          if (log) {
+            if (!log.status || !log.logs) {
+              reject()
+              return
+            }
+            const lastEvent = log.logs[log.logs.length - 1]
+            resolve(this.tcr(this.web3.utils.toChecksumAddress('0x' + lastEvent.data.slice(26))))
+            return
+          }
+          else {
+            await delay(1000)
+          }
+        }
+      })
     )
   }
 
-  // async createNewRewardTransaction(
-  //   keys: Address[],
-  //   values: number[],
-  //   imageLink: string,
-  //   detailLink: string,
-  //   header: string,
-  //   period: string,
-  // ) {
-  //   const { rootHash } = await this.postRequestMerkle('', {
-  //     keys,
-  //     values,
-  //   })
+  async createTCD({
+    minProviderStake,
+    maxProviderCount,
+    ownerRevenuePct,
+    queryPrice, }: TCDDetail
+  ) {
+    const { to, data } = await this.postRequestDApps('/create-tcd', {
+      minProviderStake,
+      maxProviderCount,
+      ownerRevenuePct,
+      queryPrice,
+    })
+    const tx = await this.createTransaction(to, data, false)
+    return new Promise<TCDClient>((resolve, reject) =>
+      tx.send().on('transactionHash', async tx_hash => {
+        if (!this.web3) {
+          reject()
+          return
+        }
+        while (true) {
+          const log = await this.web3.eth.getTransactionReceipt(tx_hash)
+          console.log(log)
+          if (log) {
+            if (!log.status || !log.logs) {
+              reject()
+              return
+            }
+            const lastEvent = log.logs[log.logs.length - 1]
+            resolve(this.tcd(this.web3.utils.toChecksumAddress('0x' + lastEvent.data.slice(26))))
+            return
+          }
+          else {
+            await delay(1000)
+          }
+        }
+      })
+    )
+  }
 
-  //   const { to: tokenAddress, data } = await this.postRequestDApps(
-  //     '/add-reward',
-  //     {
-  //       rootHash: rootHash,
-  //       totalPortion: _.sum(values),
-  //     },
-  //   )
-  //   const tx = await this.createTransaction(tokenAddress, data, false)
-  //   const { logs } = await tx.send()
-  //   if (!logs) return
-  //   const rewardId = parseInt(logs[0].topics[1] as any) // TODO: Figure out why topics[1] can be string[]
-
-  //   await this.reportRewardDetail({
-  //     imageLink,
-  //     detailLink,
-  //     header,
-  //     period,
-  //     rewardId,
-  //   })
-  // }
-
-  // async reportRewardDetail({
-  //   imageLink,
-  //   detailLink,
-  //   header,
-  //   period,
-  //   rewardId,
-  // }: {
-  //   imageLink: string
-  //   detailLink: string
-  //   header: string
-  //   period: string
-  //   rewardId: number
-  // }) {
-  //   await this.postRequestDApps(`/rewards/${rewardId}/detail`, {
-  //     imageLink,
-  //     detailLink,
-  //     header,
-  //     period,
-  //   })
-  // }
-
-  // async createClaimRewardTransaction(rewardId: number) {
-  //   const { rootHash } = await this.getRewardDetail(rewardId)
-  //   const account = await this.getAccount()
-  //   const proof = await this.getRequestMerkle(`/${rootHash}/proof/${account}`)
-  //   const kvs = await this.getRequestMerkle(`/${rootHash}`, {
-  //     key: account,
-  //   })
-  //   if (kvs.length === 0) {
-  //     InternalUtils.throw('Reward not found')
-  //   }
-  //   const { to: tokenAddress, data } = await this.postRequestDApps(`/rewards`, {
-  //     rewardId,
-  //     beneficiary: account,
-  //     rewardPortion: kvs[0].value,
-  //     proof,
-  //   })
-  //   return this.createTransaction(tokenAddress, data, false)
-  // }
 
   parameter() {
     return new ParameterClient(this.coreAddress, this.web3)
@@ -206,6 +178,10 @@ export default class CommunityClient extends BaseClient {
 
   tcr(tcrAddress: Address) {
     return new TCRClient(tcrAddress, this.web3)
+  }
+
+  tcd(ddsAddress: Address) {
+    return new TCDClient(ddsAddress, this.web3)
   }
 
   private async getRequestDApps(path: string, params?: any): Promise<any> {
@@ -220,10 +196,4 @@ export default class CommunityClient extends BaseClient {
       data,
     )
   }
-  // private async getRequestMerkle(path: string, params?: any): Promise<any> {
-  //   return await InternalUtils.getRequest(`/merkle${path}`, params)
-  // }
-  // private async postRequestMerkle(path: string, data: any): Promise<any> {
-  //   return await InternalUtils.postRequest(`/merkle${path}`, data)
-  // }
 }

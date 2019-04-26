@@ -3,7 +3,7 @@ import VoteClient from './VoteClient'
 import Web3 from 'web3'
 import InternalUtils from './InternalUtils'
 import BN from 'bn.js'
-import { Address } from '../typing'
+import { Address, EntryWithStake, ChallengeInit, CommitVote, RevealVote } from '../typing/index'
 
 export default class TCRClient extends BaseClient {
   private tcrAddress: Address
@@ -15,7 +15,7 @@ export default class TCRClient extends BaseClient {
     this.voteClient = new VoteClient(tcrAddress, web3)
   }
 
-  async createEntryTransaction(dataHash: string, amount: string | BN) {
+  async createApplyTransaction({ dataHash, amount }: EntryWithStake) {
     const { to, data, nonce } = await this.postRequestTCR('/entries', {
       sender: await this.getAccount(),
       dataHash: dataHash,
@@ -24,7 +24,7 @@ export default class TCRClient extends BaseClient {
     return this.createTransaction(to, data, true, nonce)
   }
 
-  async createDepositTransaction(dataHash: string, amount: string | BN) {
+  async createDepositTransaction({ dataHash, amount }: EntryWithStake) {
     const { to, data, nonce } = await this.postRequestTCR('/deposit', {
       sender: await this.getAccount(),
       dataHash: dataHash,
@@ -33,7 +33,7 @@ export default class TCRClient extends BaseClient {
     return this.createTransaction(to, data, true, nonce)
   }
 
-  async createWithdrawTransaction(dataHash: string, amount: string | BN) {
+  async createWithdrawTransaction({ dataHash, amount }: EntryWithStake) {
     const { to, data, nonce } = await this.postRequestTCR('/withdraw', {
       sender: await this.getAccount(),
       dataHash: dataHash,
@@ -42,11 +42,7 @@ export default class TCRClient extends BaseClient {
     return this.createTransaction(to, data, true, nonce)
   }
 
-  async createChallengeTransaction(
-    entryHash: string,
-    reasonHash: string,
-    amount: string | BN,
-  ) {
+  async createChallengeTransaction({ entryHash, reasonHash, amount }: ChallengeInit) {
     const { to, data, nonce } = await this.postRequestTCR('/challenge', {
       sender: await this.getAccount(),
       entryHash: entryHash,
@@ -64,11 +60,7 @@ export default class TCRClient extends BaseClient {
     return this.createTransaction(to, data, true, nonce)
   }
 
-  async createCommitVoteTransaction(
-    challengeId: number,
-    commitHash: string,
-    totalWeight: BN | string,
-  ) {
+  async createCommitVoteTransaction({ challengeId, commitHash, totalWeight }: CommitVote) {
     return this.voteClient.createCommitVoteTransaction(
       challengeId,
       commitHash,
@@ -76,12 +68,7 @@ export default class TCRClient extends BaseClient {
     )
   }
 
-  async createRevealVoteTransaction(
-    challengeId: number,
-    yesVote: string | BN,
-    noVote: string | BN,
-    salt: string | BN,
-  ) {
+  async createRevealVoteTransaction({ challengeId, yesVote, noVote, salt }: RevealVote) {
     return this.voteClient.createRevealVoteTransaction(
       challengeId,
       yesVote,

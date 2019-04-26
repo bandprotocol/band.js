@@ -4,8 +4,8 @@ import Web3 from 'web3'
 import BaseClient from './BaseClient'
 import CommunityClient from './CommunityClient'
 import InternalUtils from './InternalUtils'
-import IPFS from './IPFS'
-import { Address } from '../typing/index'
+import { Address, CommunityDetail, SendToken } from '../typing/index'
+import delay from 'delay'
 
 /**
  * This is class for get balance and transfer BandToken.
@@ -41,42 +41,51 @@ export default class BandProtocolClient extends BaseClient {
     }
   }
 
-  async deployCommunity(
-    name: string,
-    symbol: string,
-    logo: string,
-    banner: string,
-    description: string,
-    website: string,
-    organization: string,
-    voting: Address,
-    keys: string[],
-    values: (string | number)[],
-    collateralEquation: (string | BN)[],
-  ) {
+  async createCommunity({ name,
+    symbol,
+    bonding: {
+      collateralEquation,
+      liquiditySpread,
+    },
+    params: {
+      expirationTime,
+      minParticipationPct,
+      supportRequiredPct,
+    } }: CommunityDetail) {
     const { to, data } = await this.postRequestBand('/create-dapp', {
       name,
       symbol,
-      decimal: 18,
-      voting,
-      keys: keys.concat([
-        'info:logo',
-        'info:banner',
-        'info:description',
-        'info:website',
-        'info:organization',
-      ]),
-      values: values.concat([
-        logo,
-        banner,
-        await IPFS.set(description),
-        await IPFS.set(website),
-        await IPFS.set(organization),
-      ]),
-      collateralEquation,
+      bondingCollateralEquation: collateralEquation,
+      bondingLiquiditySpread: liquiditySpread,
+      paramsExpirationTime: expirationTime,
+      paramsMinParticipationPct: minParticipationPct,
+      paramsSupportRequiredPct: supportRequiredPct,
     })
     const tx = await this.createTransaction(to, data, false)
-    await tx.send()
+
+    return new Promise<CommunityClient>((resolve, reject) => {
+      tx.send().on('transactionHash', async tx_hash => {
+        if (!this.web3) {
+          reject()
+          return
+        }
+        while (true) {
+          const log = await this.web3.eth.getTransactionReceipt(tx_hash)
+          if (log) {
+            if (!log.status || !log.logs) {
+              reject()
+              return
+            }
+            const lastEvent = log.logs[log.logs.length - 1]
+            resolve(new CommunityClient(this.web3.utils.toChecksumAddress('0x' + lastEvent.data.slice(26)), this.web3))
+            return
+          }
+          else {
+            await delay(1000)
+          }
+        }
+      })
+    })
   }
 
   /**
@@ -127,7 +136,7 @@ export default class BandProtocolClient extends BaseClient {
    * @param to A receiver.
    * @param value An amounts.
    */
-  async createTransferTransaction(to: Address, value: string | BN) {
+  async createTransferTransaction({ to, value }: SendToken) {
     const valueString = BN.isBN(value) ? value.toString() : value
     const { to: bandAddress, data, nonce } = await this.postRequestBand(
       '/transfer',

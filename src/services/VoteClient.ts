@@ -2,7 +2,7 @@ import Web3 from 'web3'
 import BN from 'bn.js'
 import InternalUtils from './InternalUtils'
 import BaseClient from './BaseClient'
-import { Address, Vote } from '../typing'
+import { Address } from '../typing'
 
 export default class VoteClient extends BaseClient {
   private sendAddress: Address // coreAddres or tcrAddress
@@ -66,59 +66,6 @@ export default class VoteClient extends BaseClient {
       },
     )
     return this.createTransaction(to, data, false)
-  }
-
-  async getVotes(voter?: Address, pollIds?: number[]): Promise<Vote[]> {
-    const result = await this.getRequestVote('/votes', {
-      voter,
-      pollId: pollIds,
-    })
-
-    return result.map((e: any) => ({
-      ...e,
-      yesWeight: e.yesWeight && new BN(e.yesWeight),
-      noWeight: e.noWeight && new BN(e.noWeight),
-    }))
-  }
-
-  async getVotesQL(voter?: Address, pollIds?: number[]): Promise<Vote[]> {
-    // TODO : add filter
-    console.log(voter, pollIds)
-    const { tcr } = await InternalUtils.graphqlRequest(
-      `
-      {
-        tcr(address:"${this.sendAddress}") {
-          challenges {
-            onChainId
-            poll {
-              votes {
-                voter {
-                  address
-                }
-                totalWeight
-                yesWeight
-                noWeight
-              }
-            }
-          }
-        }
-      }
-    `,
-    )
-    let { challenges } = tcr
-    return challenges.reduce(
-      (acc: any, challenge: any) =>
-        acc.concat(
-          challenge.poll.votes.map((vote: any) => ({
-            onChainId: challenge.onChainId,
-            voter: vote.voter.address,
-            totalWeight: vote.totalWeight,
-            yesWeight: vote.yesWeight,
-            noWeight: vote.noWeight,
-          })),
-        ),
-      [],
-    )
   }
 
   async getVotingPower(pollId: number): Promise<BN> {

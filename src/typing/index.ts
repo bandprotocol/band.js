@@ -21,125 +21,91 @@ export interface GQLResponse {
   data?: any
 }
 
-/**
- * This is interface of object for getOrderHistory function.
- */
-export interface OrderHistory {
-  user: Address
-  orderType: string
-  value: BN
-  price: BN
-  blockTime: Time
-  txHash: string
-}
-
-/**
- * This is interface of object for getPriceHistory function.
- */
-export interface PriceHistory {
-  time: Time
-  price: number
-}
-
-export interface BandInfo {
-  address: Address
-  price: number
-  last24Hrs: number
-}
-
-export interface DappInfo {
+export interface CommunityDetail {
   name: string
   symbol: string
-  logo: string
-  description: string
-  website: string
-  address: Address
-  marketCap: number
-  price: number
-  last24Hrs: number
+  bonding: {
+    collateralEquation: string[]
+    liquiditySpread: string
+  }
+  params: {
+    expirationTime: string
+    minParticipationPct: string
+    supportRequiredPct: string
+  }
 }
 
-export interface Parameter {
-  key: string
-  value: BN
+export interface SendToken {
+  to: Address
+  value: string | BN
 }
 
-export interface Proposal {
-  proposalId: number
+export interface BuySellType {
+  amount: string | BN
+  priceLimit: string | BN
+}
+
+export interface ParameterProposal {
   reasonHash: string
-  proposer: Address
-  proposedAt: Time
-  pollEndTime: Time
-  changes: Parameter[]
-  yesVote: BN
-  noVote: BN
-  minParticipation: BN
-  supportRequiredPct: BN
-  totalVotingPower: BN
+  keys: string[]
+  values: (string | BN)[]
 }
 
-export interface VoteResult {
+export interface CastVote {
   proposalId: number
-  yesVote: BN
-  noVote: BN
+  yesVote: string | BN
+  noVote: string | BN
 }
 
-export interface RewardDetail {
-  rewardId: number
-  rootHash: string
-  totalReward: BN
-  totalClaims: number
-  totalPortion: BN
-  imageLink: string
-  detailLink: string
-  header: string
-  period: string
-  claimed?: boolean
-  amount?: BN
+export interface TCRDetail {
+  prefix: string
+  decayFunction: string[]
+  minDeposit: string
+  applyStageLength: string
+  dispensationPercentage: string
+  commitTime: string
+  revealTime: string
+  minParticipationPct: string
+  supportRequiredPct: string
 }
 
-export interface Entry {
+export interface EntryWithStake {
   dataHash: string
-  proposer: Address
-  deposit: BN
-  proposedAt: Time
-  listAt: Time
-  status: string
-  challengeId?: number
+  amount: string | BN
 }
 
-export interface Challenge {
+export interface ChallengeInit {
   entryHash: string
-  challenger: Address
-  stake: BN
-  challengeAt: Time
-  commitEndTime: Time
-  revealEndTime: Time
+  reasonHash: string
+  amount: string | BN
+}
+
+export interface CommitVote {
   challengeId: number
-  minParticipation: BN
-  supportRequiredPct: BN
-  currentParticipation: BN
-  totalVotingPower: BN
-  currentYesVote: BN
-  currentNoVote: BN
-  voterReward?: BN
-  leaderReward?: BN
-  status: string
-}
-
-export interface Vote {
-  voter: Address
   commitHash: string
-  yesWeight: BN
-  noWeight: BN
-  onChainId: number
-  claimed?: boolean
+  totalWeight: BN | string
 }
 
-export interface EntryEvent {
-  type: string
-  timestamp: Time
-  depositChanged: BN
-  actor?: Address
-  txHash?: string
+export interface RevealVote {
+  challengeId: number
+  yesVote: string | BN
+  noVote: string | BN
+  salt: string | BN
+}
+
+export interface TCDDetail {
+  minProviderStake: string
+  maxProviderCount: string
+  ownerRevenuePct: string
+  queryPrice: string
+}
+
+export interface DataSourceWithStake {
+  dataSource: Address
+  stake: string | BN
+}
+
+export interface WithdrawOwnership {
+  dataSource: Address
+  withdrawOwnership: string | BN
 }

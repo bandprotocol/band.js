@@ -3,8 +3,10 @@ import axios from 'axios'
 import { JsonResponse, GQLResponse, Address } from '../typing'
 
 export default class InternalUtils {
-  static API = 'https://bandapi-v2.herokuapp.com'
-  static GRAPH_QL_API = 'https://graphql.bandprotocol.com/graphql'
+  static API = 'http://localhost:5000'
+  static GRAPH_QL_API = 'http://localhost:5001/graphql'
+  // static API = 'https://bandapi-v2.herokuapp.com'
+  // static GRAPH_QL_API = 'https://graphql.bandprotocol.com/graphql'
 
   static throw(m: string): never {
     throw new Error(m)
@@ -12,7 +14,7 @@ export default class InternalUtils {
 
   static circularStringify(o: any): any {
     let cache: any = []
-    JSON.stringify(o, function(_, value) {
+    JSON.stringify(o, function (_, value) {
       if (typeof value === 'object' && value !== null) {
         if (cache.indexOf(value) !== -1) {
           // Duplicate reference found
