@@ -13,37 +13,37 @@ export default class DDSClient extends BaseClient {
   }
 
   async createRegisterDataSourceTransaction({ dataSource, stake }: DataSourceWithStake) {
-    const { to, data, nonce } = await this.postRequestTCR('/register', {
+    const { to, data, lastTimestamp } = await this.postRequestTCR('/register', {
       sender: await this.getAccount(),
       dataSource,
       stake: BN.isBN(stake) ? stake.toString() : stake,
     })
-    return this.createTransaction(to, data, true, nonce)
+    return this.createTransaction(to, data, true, lastTimestamp)
   }
 
   async createVoteDataSourceTransaction({ dataSource, stake }: DataSourceWithStake) {
-    const { to, data, nonce } = await this.postRequestTCR('/vote', {
+    const { to, data, lastTimestamp } = await this.postRequestTCR('/vote', {
       sender: await this.getAccount(),
       dataSource,
       stake: BN.isBN(stake) ? stake.toString() : stake,
     })
-    return this.createTransaction(to, data, true, nonce)
+    return this.createTransaction(to, data, true, lastTimestamp)
   }
 
   async createWithdrawDataSourceTransaction({ dataSource, withdrawOwnership }: WithdrawOwnership) {
-    const { to, data, nonce } = await this.postRequestTCR('/withdraw', {
+    const { to, data, lastTimestamp } = await this.postRequestTCR('/withdraw', {
       sender: await this.getAccount(),
       dataSource,
       withdrawOwnership: BN.isBN(withdrawOwnership) ? withdrawOwnership.toString() : withdrawOwnership,
     })
-    return this.createTransaction(to, data, true, nonce)
+    return this.createTransaction(to, data, true, lastTimestamp)
   }
 
   async createKickDataSourceTransaction(dataSource: Address) {
-    const { to, data, nonce } = await this.postRequestTCR('/kick', {
+    const { to, data, lastTimestamp } = await this.postRequestTCR('/kick', {
       dataSource
     })
-    return this.createTransaction(to, data, true, nonce)
+    return this.createTransaction(to, data, true, lastTimestamp)
   }
 
   async createDistributeFeeTransaction(tokenAmount: string | BN) {

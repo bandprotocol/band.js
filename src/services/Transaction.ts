@@ -8,7 +8,7 @@ export default class Transaction {
   private to: Address
   private data: string
   private isFeelessable: boolean
-  private nonce?: number
+  private lastTimestamp?: number
 
   constructor(
     web3: Web3,
@@ -16,14 +16,14 @@ export default class Transaction {
     to: Address,
     data: string,
     isFeelessable: boolean,
-    nonce?: number,
+    lastTimestamp?: number,
   ) {
     this.web3 = web3
     this.sender = sender
     this.to = to
     this.data = data
     this.isFeelessable = isFeelessable
-    this.nonce = nonce
+    this.lastTimestamp = lastTimestamp
   }
 
   getTxDetail() {
@@ -48,19 +48,20 @@ export default class Transaction {
       return InternalUtils.throw(
         'This function cannot use feeless transaction.',
       )
-    if (this.nonce === undefined) return InternalUtils.throw('Required nonce')
-
+    if (this.lastTimestamp === undefined) return InternalUtils.throw('Required last timestamp')
+    const newTimestamp = (new Date()).getTime() === this.lastTimestamp ? this.lastTimestamp + 1 : (new Date()).getTime()
     const funcInterface = '0x' + this.data.slice(2, 10)
     const dataNoSig = '0x' + this.data.slice(10 + 64)
     const senderSig = await InternalUtils.signMessage(
       this.web3,
-      this.web3.utils.soliditySha3(this.nonce, dataNoSig),
+      this.web3.utils.soliditySha3(newTimestamp, dataNoSig),
       this.sender,
     )
 
     return InternalUtils.postRequest('/band/feeless', {
       sender: this.sender,
       to: this.to,
+      newTimestamp: newTimestamp,
       funcInterface: funcInterface,
       data: dataNoSig,
       senderSig: senderSig,

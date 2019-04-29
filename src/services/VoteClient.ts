@@ -18,7 +18,7 @@ export default class VoteClient extends BaseClient {
     yesVote: string | BN,
     noVote: string | BN,
   ) {
-    const { to, data, nonce } = await this.postRequestVote(
+    const { to, data, lastTimestamp } = await this.postRequestVote(
       `/${onChainId}/castvote`,
       {
         sender: await this.getAccount(),
@@ -26,7 +26,7 @@ export default class VoteClient extends BaseClient {
         noVote: BN.isBN(noVote) ? noVote.toString() : noVote,
       },
     )
-    return this.createTransaction(to, data, true, nonce)
+    return this.createTransaction(to, data, true, lastTimestamp)
   }
 
   async createCommitVoteTransaction(
@@ -37,7 +37,7 @@ export default class VoteClient extends BaseClient {
     if (this.web3 === undefined) {
       return InternalUtils.throw('Required provider.')
     }
-    const { to, data, nonce } = await this.postRequestVote(
+    const { to, data, lastTimestamp } = await this.postRequestVote(
       `/${onChainId}/commitvote`,
       {
         sender: await this.getAccount(),
@@ -47,7 +47,7 @@ export default class VoteClient extends BaseClient {
           : totalWeight,
       },
     )
-    return this.createTransaction(to, data, true, nonce)
+    return this.createTransaction(to, data, true, lastTimestamp)
   }
 
   async createRevealVoteTransaction(

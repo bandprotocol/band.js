@@ -138,7 +138,7 @@ export default class BandProtocolClient extends BaseClient {
    */
   async createTransferTransaction({ to, value }: SendToken) {
     const valueString = BN.isBN(value) ? value.toString() : value
-    const { to: bandAddress, data, nonce } = await this.postRequestBand(
+    const { to: bandAddress, data, lastTimestamp } = await this.postRequestBand(
       '/transfer',
       {
         sender: await this.getAccount(),
@@ -146,7 +146,7 @@ export default class BandProtocolClient extends BaseClient {
         value: valueString,
       },
     )
-    return this.createTransaction(bandAddress, data, true, nonce)
+    return this.createTransaction(bandAddress, data, true, lastTimestamp)
   }
 
   private async postRequestBand(path: string, data: any): Promise<any> {

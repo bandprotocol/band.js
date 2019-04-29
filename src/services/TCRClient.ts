@@ -16,48 +16,48 @@ export default class TCRClient extends BaseClient {
   }
 
   async createApplyTransaction({ dataHash, amount }: EntryWithStake) {
-    const { to, data, nonce } = await this.postRequestTCR('/entries', {
+    const { to, data, lastTimestamp } = await this.postRequestTCR('/entries', {
       sender: await this.getAccount(),
       dataHash: dataHash,
       deposit: BN.isBN(amount) ? amount.toString() : amount,
     })
-    return this.createTransaction(to, data, true, nonce)
+    return this.createTransaction(to, data, true, lastTimestamp)
   }
 
   async createDepositTransaction({ dataHash, amount }: EntryWithStake) {
-    const { to, data, nonce } = await this.postRequestTCR('/deposit', {
+    const { to, data, lastTimestamp } = await this.postRequestTCR('/deposit', {
       sender: await this.getAccount(),
       dataHash: dataHash,
       amount: BN.isBN(amount) ? amount.toString() : amount,
     })
-    return this.createTransaction(to, data, true, nonce)
+    return this.createTransaction(to, data, true, lastTimestamp)
   }
 
   async createWithdrawTransaction({ dataHash, amount }: EntryWithStake) {
-    const { to, data, nonce } = await this.postRequestTCR('/withdraw', {
+    const { to, data, lastTimestamp } = await this.postRequestTCR('/withdraw', {
       sender: await this.getAccount(),
       dataHash: dataHash,
       amount: BN.isBN(amount) ? amount.toString() : amount,
     })
-    return this.createTransaction(to, data, true, nonce)
+    return this.createTransaction(to, data, true, lastTimestamp)
   }
 
   async createChallengeTransaction({ entryHash, reasonHash, amount }: ChallengeInit) {
-    const { to, data, nonce } = await this.postRequestTCR('/challenge', {
+    const { to, data, lastTimestamp } = await this.postRequestTCR('/challenge', {
       sender: await this.getAccount(),
       entryHash: entryHash,
       reasonHash: reasonHash,
       amount: BN.isBN(amount) ? amount.toString() : amount,
     })
-    return this.createTransaction(to, data, true, nonce)
+    return this.createTransaction(to, data, true, lastTimestamp)
   }
 
   async createExitTransaction(dataHash: string) {
-    const { to, data, nonce } = await this.postRequestTCR('/exit', {
+    const { to, data, lastTimestamp } = await this.postRequestTCR('/exit', {
       sender: await this.getAccount(),
       dataHash: dataHash,
     })
-    return this.createTransaction(to, data, true, nonce)
+    return this.createTransaction(to, data, true, lastTimestamp)
   }
 
   async createCommitVoteTransaction({ challengeId, commitHash, totalWeight }: CommitVote) {

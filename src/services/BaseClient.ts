@@ -31,11 +31,11 @@ export default class BaseClient {
     to: Address,
     data: string,
     isFeelessable: boolean,
-    nonce?: number,
+    lastTimestamp?: number,
   ) {
     if (this.web3 === undefined)
       return InternalUtils.throw('Required provider.')
     const sender = await this.getAccount()
-    return new Transaction(this.web3, sender, to, data, isFeelessable, nonce)
+    return new Transaction(this.web3, sender, to, data, isFeelessable, lastTimestamp)
   }
 }

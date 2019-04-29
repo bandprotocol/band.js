@@ -3,10 +3,8 @@ import axios from 'axios'
 import { JsonResponse, GQLResponse, Address } from '../typing'
 
 export default class InternalUtils {
-  static API = 'http://localhost:5000'
-  static GRAPH_QL_API = 'http://localhost:5001/graphql'
-  // static API = 'https://bandapi-v2.herokuapp.com'
-  // static GRAPH_QL_API = 'https://graphql.bandprotocol.com/graphql'
+  static API = 'https://api-wip.rinkeby.bandprotocol.com'
+  static GRAPH_QL_API = 'https://graphql.bandprotocol.com/graphql'
 
   static throw(m: string): never {
     throw new Error(m)

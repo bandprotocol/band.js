@@ -31,7 +31,7 @@ export default class CommunityClient extends BaseClient {
 
   async createTransferTransaction({ to, value }: SendToken) {
     const valueString = BN.isBN(value) ? value.toString() : value
-    const { to: tokenAddress, data, nonce } = await this.postRequestDApps(
+    const { to: tokenAddress, data, lastTimestamp } = await this.postRequestDApps(
       '/transfer',
       {
         sender: await this.getAccount(),
@@ -39,7 +39,7 @@ export default class CommunityClient extends BaseClient {
         value: valueString,
       },
     )
-    return this.createTransaction(tokenAddress, data, true, nonce)
+    return this.createTransaction(tokenAddress, data, true, lastTimestamp)
   }
 
   async createBuyTransaction({ amount, priceLimit }: BuySellType) {
@@ -47,7 +47,7 @@ export default class CommunityClient extends BaseClient {
     const priceLimitString = BN.isBN(priceLimit)
       ? priceLimit.toString()
       : priceLimit
-    const { to: tokenAddress, data, nonce } = await this.postRequestDApps(
+    const { to: tokenAddress, data, lastTimestamp } = await this.postRequestDApps(
       '/buy',
       {
         sender: await this.getAccount(),
@@ -55,7 +55,7 @@ export default class CommunityClient extends BaseClient {
         priceLimit: priceLimitString,
       },
     )
-    return this.createTransaction(tokenAddress, data, true, nonce)
+    return this.createTransaction(tokenAddress, data, true, lastTimestamp)
   }
 
   async createSellTransaction({ amount, priceLimit }: BuySellType) {
@@ -63,7 +63,7 @@ export default class CommunityClient extends BaseClient {
     const priceLimitString = BN.isBN(priceLimit)
       ? priceLimit.toString()
       : priceLimit
-    const { to: tokenAddress, data, nonce } = await this.postRequestDApps(
+    const { to: tokenAddress, data, lastTimestamp } = await this.postRequestDApps(
       '/sell',
       {
         sender: await this.getAccount(),
@@ -71,7 +71,7 @@ export default class CommunityClient extends BaseClient {
         priceLimit: priceLimitString,
       },
     )
-    return this.createTransaction(tokenAddress, data, true, nonce)
+    return this.createTransaction(tokenAddress, data, true, lastTimestamp)
   }
 
   async createProposeTransaction({ reasonHash, keys, values }: ParameterProposal) {
