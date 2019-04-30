@@ -25,16 +25,17 @@ export default class ParameterClient extends BaseClient {
     keys: string[],
     values: (string | BN)[],
   ) {
-    const { to: tokenAddress, data, nonce } = await this.postRequestParameter(
-      '/propose',
-      {
-        sender: await this.getAccount(),
-        reasonHash,
-        keys,
-        values: values.map((e: string | BN) => (BN.isBN(e) ? e.toString() : e)),
-      },
-    )
-    return this.createTransaction(tokenAddress, data, true, nonce)
+    const {
+      to: tokenAddress,
+      data,
+      lastTimestamp,
+    } = await this.postRequestParameter('/propose', {
+      sender: await this.getAccount(),
+      reasonHash,
+      keys,
+      values: values.map((e: string | BN) => (BN.isBN(e) ? e.toString() : e)),
+    })
+    return this.createTransaction(tokenAddress, data, true, lastTimestamp)
   }
 
   async createCastVoteTransaction(
