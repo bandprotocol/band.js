@@ -43,33 +43,15 @@ export default class Transaction {
   }
 
   async sendFeeless() {
-    // 0x(2hex) + funcSig(8hex) + userAddress(64hex) + otherParams = data
-    return this.web3.eth.sendTransaction({
-      from: this.sender,
-      to: this.to,
-      data: this.data,
+    return new Promise((resolve, reject) => {
+      this.web3.eth
+        .sendTransaction({
+          from: this.sender,
+          to: this.to,
+          data: this.data,
+        })
+        .once('transactionHash', txHash => resolve(txHash))
+        .once('error', error => reject(error))
     })
-    // if (!this.isFeelessable)
-    //   return InternalUtils.throw(
-    //     'This function cannot use feeless transaction.',
-    //   )
-    // if (this.lastTimestamp === undefined) return InternalUtils.throw('Required last timestamp')
-    // const newTimestamp = (new Date()).getTime() === this.lastTimestamp ? this.lastTimestamp + 1 : (new Date()).getTime()
-    // const funcInterface = '0x' + this.data.slice(2, 10)
-    // const dataNoSig = '0x' + this.data.slice(10 + 64)
-    // const senderSig = await InternalUtils.signMessage(
-    //   this.web3,
-    //   this.web3.utils.soliditySha3(newTimestamp, dataNoSig),
-    //   this.sender,
-    // )
-
-    // return InternalUtils.postRequest('/band/feeless', {
-    //   sender: this.sender,
-    //   to: this.to,
-    //   newTimestamp: newTimestamp,
-    //   funcInterface: funcInterface,
-    //   data: dataNoSig,
-    //   senderSig: senderSig,
-    // })
   }
 }

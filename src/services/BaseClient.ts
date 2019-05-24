@@ -27,15 +27,10 @@ export default class BaseClient {
     return this.web3 !== undefined
   }
 
-  protected async createTransaction(
-    to: Address,
-    data: string,
-    isFeelessable: boolean,
-    lastTimestamp?: number,
-  ) {
+  protected async createTransaction(to: Address, data: string) {
     if (this.web3 === undefined)
       return InternalUtils.throw('Required provider.')
     const sender = await this.getAccount()
-    return new Transaction(this.web3, sender, to, data, isFeelessable, lastTimestamp)
+    return new Transaction(this.web3, sender, to, data)
   }
 }

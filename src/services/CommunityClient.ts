@@ -7,7 +7,15 @@ import ParameterClient from './ParameterClient'
 import TCRClient from './TCRClient'
 import InternalUtils from './InternalUtils'
 import TCDClient from './TCDClient'
-import { Address, SendToken, BuySellType, ParameterProposal, CastVote, TCRDetail, TCDDetail } from '../typing/index'
+import {
+  Address,
+  SendToken,
+  BuySellType,
+  ParameterProposal,
+  CastVote,
+  TCRDetail,
+  TCDDetail,
+} from '../typing/index'
 
 export default class CommunityClient extends BaseClient {
   private coreAddress: Address
@@ -31,15 +39,14 @@ export default class CommunityClient extends BaseClient {
 
   async createTransferTransaction({ to, value }: SendToken) {
     const valueString = BN.isBN(value) ? value.toString() : value
-    const { to: tokenAddress, data, lastTimestamp } = await this.postRequestDApps(
+    const { to: tokenAddress, data } = await this.postRequestDApps(
       '/transfer',
       {
-        sender: await this.getAccount(),
         to: to,
         value: valueString,
       },
     )
-    return this.createTransaction(tokenAddress, data, true, lastTimestamp)
+    return this.createTransaction(tokenAddress, data)
   }
 
   async createBuyTransaction({ amount, priceLimit }: BuySellType) {
@@ -47,15 +54,11 @@ export default class CommunityClient extends BaseClient {
     const priceLimitString = BN.isBN(priceLimit)
       ? priceLimit.toString()
       : priceLimit
-    const { to: tokenAddress, data, lastTimestamp } = await this.postRequestDApps(
-      '/buy',
-      {
-        sender: await this.getAccount(),
-        value: amountString,
-        priceLimit: priceLimitString,
-      },
-    )
-    return this.createTransaction(tokenAddress, data, true, lastTimestamp)
+    const { to: tokenAddress, data } = await this.postRequestDApps('/buy', {
+      value: amountString,
+      priceLimit: priceLimitString,
+    })
+    return this.createTransaction(tokenAddress, data)
   }
 
   async createSellTransaction({ amount, priceLimit }: BuySellType) {
@@ -63,23 +66,23 @@ export default class CommunityClient extends BaseClient {
     const priceLimitString = BN.isBN(priceLimit)
       ? priceLimit.toString()
       : priceLimit
-    const { to: tokenAddress, data, lastTimestamp } = await this.postRequestDApps(
-      '/sell',
-      {
-        sender: await this.getAccount(),
-        value: amountString,
-        priceLimit: priceLimitString,
-      },
-    )
-    return this.createTransaction(tokenAddress, data, true, lastTimestamp)
+    const { to: tokenAddress, data } = await this.postRequestDApps('/sell', {
+      value: amountString,
+      priceLimit: priceLimitString,
+    })
+    return this.createTransaction(tokenAddress, data)
   }
 
-  async createProposeTransaction({ reasonHash, keys, values }: ParameterProposal) {
+  async createProposeTransaction({
+    reasonHash,
+    keys,
+    values,
+  }: ParameterProposal) {
     return this.parameter().createProposalTransaction(reasonHash, keys, values)
   }
 
-  async createProposalVoteTransaction({ proposalId, yesVote, noVote }: CastVote) {
-    return this.parameter().createCastVoteTransaction(proposalId, yesVote, noVote)
+  async createProposalVoteTransaction({ proposalId, isAccepted }: CastVote) {
+    return this.parameter().createCastVoteTransaction(proposalId, isAccepted)
   }
 
   async createTCR({
@@ -91,8 +94,8 @@ export default class CommunityClient extends BaseClient {
     commitTime,
     revealTime,
     minParticipationPct,
-    supportRequiredPct }: TCRDetail
-  ) {
+    supportRequiredPct,
+  }: TCRDetail) {
     prefix += ':'
     const { to, data } = await this.postRequestDApps('/create-tcr', {
       prefix,
@@ -103,9 +106,9 @@ export default class CommunityClient extends BaseClient {
       commitTime,
       revealTime,
       minParticipationPct,
-      supportRequiredPct
+      supportRequiredPct,
     })
-    const tx = await this.createTransaction(to, data, false)
+    const tx = await this.createTransaction(to, data)
     return new Promise<TCRClient>((resolve, reject) =>
       tx.send().on('transactionHash', async tx_hash => {
         if (!this.web3) {
@@ -121,14 +124,19 @@ export default class CommunityClient extends BaseClient {
               return
             }
             const lastEvent = log.logs[log.logs.length - 1]
-            resolve(this.tcr(this.web3.utils.toChecksumAddress('0x' + lastEvent.data.slice(26))))
+            resolve(
+              this.tcr(
+                this.web3.utils.toChecksumAddress(
+                  '0x' + lastEvent.data.slice(26),
+                ),
+              ),
+            )
             return
-          }
-          else {
+          } else {
             await delay(1000)
           }
         }
-      })
+      }),
     )
   }
 
@@ -136,15 +144,15 @@ export default class CommunityClient extends BaseClient {
     minProviderStake,
     maxProviderCount,
     ownerRevenuePct,
-    queryPrice, }: TCDDetail
-  ) {
+    queryPrice,
+  }: TCDDetail) {
     const { to, data } = await this.postRequestDApps('/create-tcd', {
       minProviderStake,
       maxProviderCount,
       ownerRevenuePct,
       queryPrice,
     })
-    const tx = await this.createTransaction(to, data, false)
+    const tx = await this.createTransaction(to, data)
     return new Promise<TCDClient>((resolve, reject) =>
       tx.send().on('transactionHash', async tx_hash => {
         if (!this.web3) {
@@ -160,17 +168,21 @@ export default class CommunityClient extends BaseClient {
               return
             }
             const lastEvent = log.logs[log.logs.length - 1]
-            resolve(this.tcd(this.web3.utils.toChecksumAddress('0x' + lastEvent.data.slice(26))))
+            resolve(
+              this.tcd(
+                this.web3.utils.toChecksumAddress(
+                  '0x' + lastEvent.data.slice(26),
+                ),
+              ),
+            )
             return
-          }
-          else {
+          } else {
             await delay(1000)
           }
         }
-      })
+      }),
     )
   }
-
 
   parameter() {
     return new ParameterClient(this.coreAddress, this.web3)

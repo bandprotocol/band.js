@@ -1,80 +1,91 @@
 import BaseClient from './BaseClient'
-import VoteClient from './VoteClient'
 import Web3 from 'web3'
 import InternalUtils from './InternalUtils'
 import BN from 'bn.js'
-import { Address, EntryWithStake, ChallengeInit, CommitVote, RevealVote } from '../typing/index'
+import {
+  Address,
+  EntryWithStake,
+  ChallengeInit,
+  CommitVote,
+  RevealVote,
+} from '../typing/index'
 
 export default class TCRClient extends BaseClient {
   private tcrAddress: Address
-  private voteClient: VoteClient
 
   constructor(tcrAddress: Address, web3?: Web3) {
     super(web3)
     this.tcrAddress = tcrAddress
-    this.voteClient = new VoteClient(tcrAddress, web3)
   }
 
   async createApplyTransaction({ dataHash, amount }: EntryWithStake) {
-    const { to, data, lastTimestamp } = await this.postRequestTCR('/entries', {
-      sender: await this.getAccount(),
+    const { to, data } = await this.postRequestTCR('/entries', {
       dataHash: dataHash,
       deposit: BN.isBN(amount) ? amount.toString() : amount,
     })
-    return this.createTransaction(to, data, true, lastTimestamp)
+    return this.createTransaction(to, data)
   }
 
   async createDepositTransaction({ dataHash, amount }: EntryWithStake) {
-    const { to, data, lastTimestamp } = await this.postRequestTCR('/deposit', {
-      sender: await this.getAccount(),
+    const { to, data } = await this.postRequestTCR('/deposit', {
       dataHash: dataHash,
       amount: BN.isBN(amount) ? amount.toString() : amount,
     })
-    return this.createTransaction(to, data, true, lastTimestamp)
+    return this.createTransaction(to, data)
   }
 
   async createWithdrawTransaction({ dataHash, amount }: EntryWithStake) {
-    const { to, data, lastTimestamp } = await this.postRequestTCR('/withdraw', {
-      sender: await this.getAccount(),
+    const { to, data } = await this.postRequestTCR('/withdraw', {
       dataHash: dataHash,
       amount: BN.isBN(amount) ? amount.toString() : amount,
     })
-    return this.createTransaction(to, data, true, lastTimestamp)
+    return this.createTransaction(to, data)
   }
 
-  async createChallengeTransaction({ entryHash, reasonHash, amount }: ChallengeInit) {
-    const { to, data, lastTimestamp } = await this.postRequestTCR('/challenge', {
-      sender: await this.getAccount(),
+  async createChallengeTransaction({
+    entryHash,
+    reasonHash,
+    amount,
+  }: ChallengeInit) {
+    const { to, data } = await this.postRequestTCR('/challenge', {
       entryHash: entryHash,
       reasonHash: reasonHash,
       amount: BN.isBN(amount) ? amount.toString() : amount,
     })
-    return this.createTransaction(to, data, true, lastTimestamp)
+    return this.createTransaction(to, data)
   }
 
   async createExitTransaction(dataHash: string) {
-    const { to, data, lastTimestamp } = await this.postRequestTCR('/exit', {
-      sender: await this.getAccount(),
-      dataHash: dataHash,
+    const { to, data } = await this.postRequestTCR('/exit', {
+      dataHash,
     })
-    return this.createTransaction(to, data, true, lastTimestamp)
+    return this.createTransaction(to, data)
   }
 
-  async createCommitVoteTransaction({ challengeId, commitHash, totalWeight }: CommitVote) {
-    return this.voteClient.createCommitVoteTransaction(
-      challengeId,
-      commitHash,
-      totalWeight,
+  async createCommitVoteTransaction({ challengeId, commitHash }: CommitVote) {
+    const { to, data } = await this.postRequestTCR(
+      `/${challengeId}/commit-vote`,
+      {
+        commitHash,
+      },
     )
+    return this.createTransaction(to, data)
   }
 
-  async createRevealVoteTransaction({ challengeId, yesVote, noVote, salt }: RevealVote) {
-    return this.voteClient.createRevealVoteTransaction(
-      challengeId,
-      yesVote,
-      noVote,
-      salt,
+  async createRevealVoteTransaction({
+    challengeId,
+    voteKeep,
+    salt,
+  }: RevealVote) {
+    const { to, data } = await this.postRequestTCR(
+      `/${challengeId}/reveal-vote`,
+      {
+        voter: await this.getAccount(),
+        voteKeep,
+        salt: BN.isBN(salt) ? salt.toString() : salt,
+      },
     )
+    return this.createTransaction(to, data)
   }
 
   async createClaimRewardTransaction(challengeId: number) {
@@ -82,11 +93,7 @@ export default class TCRClient extends BaseClient {
       rewardOwner: await this.getAccount(),
       challengeId,
     })
-    return this.createTransaction(to, data, false)
-  }
-
-  async getVotingPower(challengeId: number) {
-    return await this.voteClient.getVotingPower(challengeId)
+    return this.createTransaction(to, data)
   }
 
   async getMinDeposit(entryHash: string): Promise<BN> {

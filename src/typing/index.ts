@@ -53,8 +53,7 @@ export interface ParameterProposal {
 
 export interface CastVote {
   proposalId: number
-  yesVote: string | BN
-  noVote: string | BN
+  isAccepted: boolean
 }
 
 export interface TCRDetail {
@@ -83,13 +82,11 @@ export interface ChallengeInit {
 export interface CommitVote {
   challengeId: number
   commitHash: string
-  totalWeight: BN | string
 }
 
 export interface RevealVote {
   challengeId: number
-  yesVote: string | BN
-  noVote: string | BN
+  voteKeep: boolean
   salt: string | BN
 }
 

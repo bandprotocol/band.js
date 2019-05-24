@@ -41,17 +41,12 @@ export default class BandProtocolClient extends BaseClient {
     }
   }
 
-  async createCommunity({ name,
+  async createCommunity({
+    name,
     symbol,
-    bonding: {
-      collateralEquation,
-      liquiditySpread,
-    },
-    params: {
-      expirationTime,
-      minParticipationPct,
-      supportRequiredPct,
-    } }: CommunityDetail) {
+    bonding: { collateralEquation, liquiditySpread },
+    params: { expirationTime, minParticipationPct, supportRequiredPct },
+  }: CommunityDetail) {
     const { to, data } = await this.postRequestBand('/create-dapp', {
       name,
       symbol,
@@ -61,10 +56,10 @@ export default class BandProtocolClient extends BaseClient {
       paramsMinParticipationPct: minParticipationPct,
       paramsSupportRequiredPct: supportRequiredPct,
     })
-    const tx = await this.createTransaction(to, data, false)
+    const tx = await this.createTransaction(to, data)
 
     return new Promise<CommunityClient>((resolve, reject) => {
-      tx.send().on('transactionHash', async tx_hash => {
+      tx.send().on('transactionHash', async (tx_hash: string) => {
         if (!this.web3) {
           reject()
           return
@@ -77,10 +72,16 @@ export default class BandProtocolClient extends BaseClient {
               return
             }
             const lastEvent = log.logs[log.logs.length - 1]
-            resolve(new CommunityClient(this.web3.utils.toChecksumAddress('0x' + lastEvent.data.slice(26)), this.web3))
+            resolve(
+              new CommunityClient(
+                this.web3.utils.toChecksumAddress(
+                  '0x' + lastEvent.data.slice(26),
+                ),
+                this.web3,
+              ),
+            )
             return
-          }
-          else {
+          } else {
             await delay(1000)
           }
         }
@@ -138,15 +139,11 @@ export default class BandProtocolClient extends BaseClient {
    */
   async createTransferTransaction({ to, value }: SendToken) {
     const valueString = BN.isBN(value) ? value.toString() : value
-    const { to: bandAddress, data, lastTimestamp } = await this.postRequestBand(
-      '/transfer',
-      {
-        sender: await this.getAccount(),
-        to: to,
-        value: valueString,
-      },
-    )
-    return this.createTransaction(bandAddress, data, true, lastTimestamp)
+    const { to: bandAddress, data } = await this.postRequestBand('/transfer', {
+      to: to,
+      value: valueString,
+    })
+    return this.createTransaction(bandAddress, data)
   }
 
   private async postRequestBand(path: string, data: any): Promise<any> {

@@ -2,9 +2,13 @@ import BaseClient from './BaseClient'
 import Web3 from 'web3'
 import InternalUtils from './InternalUtils'
 import BN from 'bn.js'
-import { Address, DataSourceWithStake, WithdrawOwnership } from '../typing/index'
+import {
+  Address,
+  DataSourceWithStake,
+  WithdrawOwnership,
+} from '../typing/index'
 
-export default class DDSClient extends BaseClient {
+export default class TCDClient extends BaseClient {
   private ddsAddress: Address
 
   constructor(ddsAddress: Address, web3?: Web3) {
@@ -12,45 +16,53 @@ export default class DDSClient extends BaseClient {
     this.ddsAddress = ddsAddress
   }
 
-  async createRegisterDataSourceTransaction({ dataSource, stake }: DataSourceWithStake) {
-    const { to, data, lastTimestamp } = await this.postRequestTCR('/register', {
-      sender: await this.getAccount(),
+  async createRegisterDataSourceTransaction({
+    dataSource,
+    stake,
+  }: DataSourceWithStake) {
+    const { to, data } = await this.postRequestTCR('/register', {
       dataSource,
       stake: BN.isBN(stake) ? stake.toString() : stake,
     })
-    return this.createTransaction(to, data, true, lastTimestamp)
+    return this.createTransaction(to, data)
   }
 
-  async createVoteDataSourceTransaction({ dataSource, stake }: DataSourceWithStake) {
-    const { to, data, lastTimestamp } = await this.postRequestTCR('/vote', {
-      sender: await this.getAccount(),
+  async createVoteDataSourceTransaction({
+    dataSource,
+    stake,
+  }: DataSourceWithStake) {
+    const { to, data } = await this.postRequestTCR('/vote', {
       dataSource,
       stake: BN.isBN(stake) ? stake.toString() : stake,
     })
-    return this.createTransaction(to, data, true, lastTimestamp)
+    return this.createTransaction(to, data)
   }
 
-  async createWithdrawDataSourceTransaction({ dataSource, withdrawOwnership }: WithdrawOwnership) {
-    const { to, data, lastTimestamp } = await this.postRequestTCR('/withdraw', {
-      sender: await this.getAccount(),
+  async createWithdrawDataSourceTransaction({
+    dataSource,
+    withdrawOwnership,
+  }: WithdrawOwnership) {
+    const { to, data } = await this.postRequestTCR('/withdraw', {
       dataSource,
-      withdrawOwnership: BN.isBN(withdrawOwnership) ? withdrawOwnership.toString() : withdrawOwnership,
+      withdrawOwnership: BN.isBN(withdrawOwnership)
+        ? withdrawOwnership.toString()
+        : withdrawOwnership,
     })
-    return this.createTransaction(to, data, true, lastTimestamp)
+    return this.createTransaction(to, data)
   }
 
   async createKickDataSourceTransaction(dataSource: Address) {
-    const { to, data, lastTimestamp } = await this.postRequestTCR('/kick', {
-      dataSource
+    const { to, data } = await this.postRequestTCR('/kick', {
+      dataSource,
     })
-    return this.createTransaction(to, data, true, lastTimestamp)
+    return this.createTransaction(to, data)
   }
 
   async createDistributeFeeTransaction(tokenAmount: string | BN) {
     const { to, data } = await this.postRequestTCR('/distribute-fee', {
-      amount: BN.isBN(tokenAmount) ? tokenAmount.toString() : tokenAmount
+      amount: BN.isBN(tokenAmount) ? tokenAmount.toString() : tokenAmount,
     })
-    return this.createTransaction(to, data, false)
+    return this.createTransaction(to, data)
   }
 
   private async postRequestTCR(path: string, data: any): Promise<any> {
