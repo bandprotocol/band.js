@@ -46,7 +46,8 @@ window.IPFS = IPFS
 window.BN = BN
 
 window.bandInit = async () => {
-  window.BandProtocolClient.setAPI('https://api-wip.rinkeby.bandprotocol.com')
+  window.BandProtocolClient.setAPI('http://localhost:5000')
+  window.BandProtocolClient.setGraphQlAPI('http://localhost:5001/graphql')
   window.web4 = new Web3(window.web3.currentProvider)
   window.bandClient = await BandProtocolClient.make({
     provider: window.web4.currentProvider,

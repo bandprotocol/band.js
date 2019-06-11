@@ -9,18 +9,18 @@ import {
 } from '../typing/index'
 
 export default class TCDClient extends BaseClient {
-  private ddsAddress: Address
+  private tcdAddress: Address
 
-  constructor(ddsAddress: Address, web3?: Web3) {
+  constructor(tcdAddress: Address, web3?: Web3) {
     super(web3)
-    this.ddsAddress = ddsAddress
+    this.tcdAddress = tcdAddress
   }
 
   async createRegisterDataSourceTransaction({
     dataSource,
     stake,
   }: DataSourceWithStake) {
-    const { to, data } = await this.postRequestTCR('/register', {
+    const { to, data } = await this.postRequestTCD('/register', {
       dataSource,
       stake: BN.isBN(stake) ? stake.toString() : stake,
     })
@@ -31,7 +31,7 @@ export default class TCDClient extends BaseClient {
     dataSource,
     stake,
   }: DataSourceWithStake) {
-    const { to, data } = await this.postRequestTCR('/vote', {
+    const { to, data } = await this.postRequestTCD('/stake', {
       dataSource,
       stake: BN.isBN(stake) ? stake.toString() : stake,
     })
@@ -42,7 +42,7 @@ export default class TCDClient extends BaseClient {
     dataSource,
     withdrawOwnership,
   }: WithdrawOwnership) {
-    const { to, data } = await this.postRequestTCR('/withdraw', {
+    const { to, data } = await this.postRequestTCD('/unstake', {
       dataSource,
       withdrawOwnership: BN.isBN(withdrawOwnership)
         ? withdrawOwnership.toString()
@@ -51,23 +51,16 @@ export default class TCDClient extends BaseClient {
     return this.createTransaction(to, data)
   }
 
-  async createKickDataSourceTransaction(dataSource: Address) {
-    const { to, data } = await this.postRequestTCR('/kick', {
-      dataSource,
-    })
-    return this.createTransaction(to, data)
-  }
-
   async createDistributeFeeTransaction(tokenAmount: string | BN) {
-    const { to, data } = await this.postRequestTCR('/distribute-fee', {
+    const { to, data } = await this.postRequestTCD('/distribute-fee', {
       amount: BN.isBN(tokenAmount) ? tokenAmount.toString() : tokenAmount,
     })
     return this.createTransaction(to, data)
   }
 
-  private async postRequestTCR(path: string, data: any): Promise<any> {
+  private async postRequestTCD(path: string, data: any): Promise<any> {
     return await InternalUtils.postRequest(
-      `/data/${this.ddsAddress}${path}`,
+      `/data/${this.tcdAddress}${path}`,
       data,
     )
   }
