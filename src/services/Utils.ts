@@ -1,6 +1,8 @@
 import BigNumber from 'bignumber.js'
+import axios from 'axios'
 import BN from 'bn.js'
 import InternalUtils from './InternalUtils'
+import { JsonResponse } from '../typing/index'
 
 export default class Utils {
   static opad64(x: string): string {
@@ -19,6 +21,15 @@ export default class Utils {
     return new BN(
       new BigNumber(value).multipliedBy(new BigNumber(1e18)).toFixed(0),
     )
+  }
+
+  static async getDataRequest(path: string, params?: any): Promise<any> {
+    const url = InternalUtils.API + '/data' + path
+    const response = await axios.get<JsonResponse>(url, { params })
+    if (response.data.message !== undefined) {
+      throw new Error(response.data.message)
+    }
+    return response.data.result
   }
 
   static async graphqlRequest(query: any): Promise<any> {

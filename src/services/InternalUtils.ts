@@ -12,7 +12,7 @@ export default class InternalUtils {
 
   static circularStringify(o: any): any {
     let cache: any = []
-    JSON.stringify(o, function (_, value) {
+    JSON.stringify(o, function(_, value) {
       if (typeof value === 'object' && value !== null) {
         if (cache.indexOf(value) !== -1) {
           // Duplicate reference found
@@ -33,7 +33,7 @@ export default class InternalUtils {
   }
 
   static async getRequest(path: string, params?: any): Promise<any> {
-    const url = InternalUtils.API + path
+    const url = InternalUtils.API + '/txgen' + path
     const response = await axios.get<JsonResponse>(url, { params })
     if (response.data.message !== undefined) {
       throw new Error(response.data.message)
@@ -42,7 +42,7 @@ export default class InternalUtils {
   }
 
   static async postRequest(path: string, data: any): Promise<any> {
-    const url = InternalUtils.API + path
+    const url = InternalUtils.API + '/txgen' + path
     const response = await axios.post<JsonResponse>(url, data)
     if (response.data.message !== undefined) {
       throw new Error(response.data.message)

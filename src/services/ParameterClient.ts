@@ -6,11 +6,11 @@ import BN from 'bn.js'
 import { Address } from '../typing'
 
 export default class ParameterClient extends BaseClient {
-  private parameterAddress: Address
+  private coreAddress: Address
 
-  constructor(parameterAddress: Address, web3?: Web3) {
+  constructor(coreAddress: Address, web3?: Web3) {
     super(web3)
-    this.parameterAddress = parameterAddress
+    this.coreAddress = coreAddress
   }
 
   async createProposalTransaction(
@@ -41,7 +41,7 @@ export default class ParameterClient extends BaseClient {
 
   private async postRequestParameter(path: string, data: any): Promise<any> {
     return await InternalUtils.postRequest(
-      `/parameter/${this.parameterAddress}${path}`,
+      `/parameter/${this.coreAddress}${path}`,
       data,
     )
   }

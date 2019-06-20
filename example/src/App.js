@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import logo from './logo.svg'
 import Web3 from 'web3'
-import { BandProtocolClient, IPFS } from 'band.js'
+import { BandProtocolClient, IPFS, Utils } from 'band.js'
 import BigNumber from 'bignumber.js'
 import BN from 'bn.js'
 import './App.css'
@@ -41,7 +41,10 @@ class App extends Component {
   }
 }
 
+BandProtocolClient.setAPI('https://band-kovan.herokuapp.com')
+
 window.BandProtocolClient = BandProtocolClient
+window.BandUtil = Utils
 window.IPFS = IPFS
 window.BN = BN
 
