@@ -17,22 +17,31 @@ import {
 
 export default class CommunityClient extends BaseClient {
   private tokenAddress: Address
+  private parameterAddress: Address
+  private curveAddress: Address
 
-  constructor(tokenAddress: Address, web3?: Web3) {
+  constructor(
+    tokenAddress: Address,
+    parameterAddress: Address,
+    curveAddress: Address,
+    web3?: Web3,
+  ) {
     super(web3)
     this.tokenAddress = tokenAddress
+    this.parameterAddress = parameterAddress
+    this.curveAddress = curveAddress
   }
 
   async getBuyPrice(amount: string | BN): Promise<BN> {
     const amountString = BN.isBN(amount) ? amount.toString() : amount
     const url = `/buy-price/${amountString}`
-    return new BN((await this.getRequestToken(url)).price)
+    return new BN((await this.getRequestCurve(url)).price)
   }
 
   async getSellPrice(amount: string | BN): Promise<BN> {
     const amountString = BN.isBN(amount) ? amount.toString() : amount
     const url = `/sell-price/${amountString}`
-    return new BN((await this.getRequestToken(url)).price)
+    return new BN((await this.getRequestCurve(url)).price)
   }
 
   async createTransferTransaction({ to, value }: SendToken) {
@@ -52,7 +61,7 @@ export default class CommunityClient extends BaseClient {
     const priceLimitString = BN.isBN(priceLimit)
       ? priceLimit.toString()
       : priceLimit
-    const { to: tokenAddress, data } = await this.postRequestToken('/buy', {
+    const { to: tokenAddress, data } = await this.postRequestCurve('/buy', {
       value: amountString,
       priceLimit: priceLimitString,
     })
@@ -64,7 +73,7 @@ export default class CommunityClient extends BaseClient {
     const priceLimitString = BN.isBN(priceLimit)
       ? priceLimit.toString()
       : priceLimit
-    const { to: tokenAddress, data } = await this.postRequestToken('/sell', {
+    const { to: tokenAddress, data } = await this.postRequestCurve('/sell', {
       value: amountString,
       priceLimit: priceLimitString,
     })
@@ -83,107 +92,8 @@ export default class CommunityClient extends BaseClient {
     return this.parameter().createCastVoteTransaction(proposalId, isAccepted)
   }
 
-  // async createTCR({
-  //   prefix,
-  //   decayFunction,
-  //   minDeposit,
-  //   applyStageLength,
-  //   dispensationPercentage,
-  //   commitTime,
-  //   revealTime,
-  //   minParticipationPct,
-  //   supportRequiredPct,
-  // }: TCRDetail) {
-  //   prefix += ':'
-  //   const { to, data } = await this.postRequestToken('/create-tcr', {
-  //     prefix,
-  //     decayFunction,
-  //     minDeposit,
-  //     applyStageLength,
-  //     dispensationPercentage,
-  //     commitTime,
-  //     revealTime,
-  //     minParticipationPct,
-  //     supportRequiredPct,
-  //   })
-  //   const tx = await this.createTransaction(to, data)
-  //   return new Promise<TCRClient>((resolve, reject) =>
-  //     tx.send().on('transactionHash', async tx_hash => {
-  //       if (!this.web3) {
-  //         reject()
-  //         return
-  //       }
-  //       while (true) {
-  //         const log = await this.web3.eth.getTransactionReceipt(tx_hash)
-  //         console.log(log)
-  //         if (log) {
-  //           if (!log.status || !log.logs) {
-  //             reject()
-  //             return
-  //           }
-  //           const lastEvent = log.logs[log.logs.length - 1]
-  //           resolve(
-  //             this.tcr(
-  //               this.web3.utils.toChecksumAddress(
-  //                 '0x' + lastEvent.data.slice(26),
-  //               ),
-  //             ),
-  //           )
-  //           return
-  //         } else {
-  //           await delay(1000)
-  //         }
-  //       }
-  //     }),
-  //   )
-  // }
-
-  // async createTCD({
-  //   minProviderStake,
-  //   maxProviderCount,
-  //   ownerRevenuePct,
-  //   queryPrice,
-  // }: TCDDetail) {
-  //   const { to, data } = await this.postRequestToken('/create-tcd', {
-  //     minProviderStake,
-  //     maxProviderCount,
-  //     ownerRevenuePct,
-  //     queryPrice,
-  //   })
-  //   const tx = await this.createTransaction(to, data)
-  //   return new Promise<TCDClient>((resolve, reject) =>
-  //     tx.send().on('transactionHash', async tx_hash => {
-  //       if (!this.web3) {
-  //         reject()
-  //         return
-  //       }
-  //       while (true) {
-  //         const log = await this.web3.eth.getTransactionReceipt(tx_hash)
-  //         console.log(log)
-  //         if (log) {
-  //           if (!log.status || !log.logs) {
-  //             reject()
-  //             return
-  //           }
-  //           const lastEvent = log.logs[log.logs.length - 1]
-  //           resolve(
-  //             this.tcd(
-  //               this.web3.utils.toChecksumAddress(
-  //                 '0x' + lastEvent.data.slice(26),
-  //               ),
-  //             ),
-  //           )
-  //           return
-  //         } else {
-  //           await delay(1000)
-  //         }
-  //       }
-  //     }),
-  //   )
-  // }
-
   parameter() {
-    return new ParameterClient(this.tokenAddress, this.web3)
+    return new ParameterClient(this.parameterAddress, this.web3)
   }
 
   tcr(tcrAddress: Address) {
@@ -194,12 +104,20 @@ export default class CommunityClient extends BaseClient {
     return new TCDClient(tcdAddress, this.web3)
   }
 
-  private async getRequestToken(path: string, params?: any): Promise<any> {
+  private async getRequestCurve(path: string, params?: any): Promise<any> {
     return await InternalUtils.getRequest(
-      `/token/${this.tokenAddress}${path}`,
+      `/token/${this.curveAddress}${path}`,
       params,
     )
   }
+
+  private async postRequestCurve(path: string, data: any): Promise<any> {
+    return await InternalUtils.postRequest(
+      `/token/${this.curveAddress}${path}`,
+      data,
+    )
+  }
+
   private async postRequestToken(path: string, data: any): Promise<any> {
     return await InternalUtils.postRequest(
       `/token/${this.tokenAddress}${path}`,

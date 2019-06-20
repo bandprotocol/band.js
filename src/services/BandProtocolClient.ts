@@ -40,69 +40,38 @@ export default class BandProtocolClient extends BaseClient {
     }
   }
 
-  // async createCommunity({
-  //   name,
-  //   symbol,
-  //   bonding: { collateralEquation, liquiditySpread },
-  //   params: { expirationTime, minParticipationPct, supportRequiredPct },
-  // }: CommunityDetail) {
-  //   const { to, data } = await this.postRequestBand('/create-dapp', {
-  //     name,
-  //     symbol,
-  //     bondingCollateralEquation: collateralEquation,
-  //     bondingLiquiditySpread: liquiditySpread,
-  //     paramsExpirationTime: expirationTime,
-  //     paramsMinParticipationPct: minParticipationPct,
-  //     paramsSupportRequiredPct: supportRequiredPct,
-  //   })
-  //   const tx = await this.createTransaction(to, data)
-
-  //   return new Promise<CommunityClient>((resolve, reject) => {
-  //     tx.send().on('transactionHash', async (tx_hash: string) => {
-  //       if (!this.web3) {
-  //         reject()
-  //         return
-  //       }
-  //       while (true) {
-  //         const log = await this.web3.eth.getTransactionReceipt(tx_hash)
-  //         if (log) {
-  //           if (!log.status || !log.logs) {
-  //             reject()
-  //             return
-  //           }
-  //           const lastEvent = log.logs[log.logs.length - 1]
-  //           resolve(
-  //             new CommunityClient(
-  //               this.web3.utils.toChecksumAddress(
-  //                 '0x' + lastEvent.data.slice(26),
-  //               ),
-  //               this.web3,
-  //             ),
-  //           )
-  //           return
-  //         } else {
-  //           await delay(1000)
-  //         }
-  //       }
-  //     })
-  //   })
-  // }
-
   /**
    *
    * @param tokenAddress A CommunityToken's address.
    * @returns An instance of CommunityClient.
    */
   async at(tokenAddress: Address) {
-    const { tokenByAddress } = await InternalUtils.graphqlRequest(
+    const {
+      tokenByAddress: {
+        address,
+        parameterByTokenAddress: { address: parameterAddress },
+        curveByTokenAddress: { address: curveAddress },
+      },
+    } = await InternalUtils.graphqlRequest(
       `{
         tokenByAddress(address:"${tokenAddress}") {
           address
-      }
-    }`,
+          parameterByTokenAddress {
+            address
+          }
+          curveByTokenAddress{
+            address
+          }
+        }
+      }`,
     )
-    if (tokenByAddress && tokenByAddress.address === tokenAddress) {
-      return new CommunityClient(tokenAddress, this.web3)
+    if (address && address === tokenAddress && parameterAddress) {
+      return new CommunityClient(
+        tokenAddress,
+        parameterAddress,
+        curveAddress,
+        this.web3,
+      )
     }
     return InternalUtils.throw("This dapp contract's address is invalid.")
   }
