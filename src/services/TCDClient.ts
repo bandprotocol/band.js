@@ -1,12 +1,16 @@
 import BaseClient from './BaseClient'
 import Web3 from 'web3'
-import InternalUtils from './InternalUtils'
 import BN from 'bn.js'
+import Txgen from './Txgen'
 import {
   Address,
   DataSourceWithStake,
   WithdrawOwnership,
+  TokenLockQuery,
 } from '../typing/index'
+
+const findPrevSource = ({}, {}): Address =>
+  '0x0000000000000000000000000000000000000000'
 
 export default class TCDClient extends BaseClient {
   private tcdAddress: Address
@@ -20,48 +24,96 @@ export default class TCDClient extends BaseClient {
     dataSource,
     stake,
   }: DataSourceWithStake) {
-    const { to, data } = await this.postRequestTCD('/register', {
-      dataSource,
-      stake: BN.isBN(stake) ? stake.toString() : stake,
-    })
-    return this.createTransaction(to, data)
+    const stakeString = BN.isBN(stake) ? stake.toString() : stake
+    return this.createTransaction(
+      this.tcdAddress,
+      Txgen.createTransactionData(
+        'register(address,address,uint256)',
+        ['address', 'address', 'uint256'],
+        [dataSource, findPrevSource(this.tcdAddress, dataSource), stakeString],
+      ),
+    )
   }
 
   async createVoteDataSourceTransaction({
     dataSource,
     stake,
   }: DataSourceWithStake) {
-    const { to, data } = await this.postRequestTCD('/stake', {
-      dataSource,
-      stake: BN.isBN(stake) ? stake.toString() : stake,
-    })
-    return this.createTransaction(to, data)
+    const stakeString = BN.isBN(stake) ? stake.toString() : stake
+    return this.createTransaction(
+      this.tcdAddress,
+      Txgen.createTransactionData(
+        'stake(address,address,address,uint256)',
+        ['address', 'address', 'address', 'uint256'],
+        [
+          dataSource,
+          findPrevSource(this.tcdAddress, dataSource),
+          findPrevSource(this.tcdAddress, dataSource),
+          stakeString,
+        ],
+      ),
+    )
   }
 
   async createWithdrawDataSourceTransaction({
     dataSource,
     withdrawOwnership,
   }: WithdrawOwnership) {
-    const { to, data } = await this.postRequestTCD('/unstake', {
-      dataSource,
-      withdrawOwnership: BN.isBN(withdrawOwnership)
-        ? withdrawOwnership.toString()
-        : withdrawOwnership,
-    })
-    return this.createTransaction(to, data)
+    const withdrawOwnershipString = BN.isBN(withdrawOwnership)
+      ? withdrawOwnership.toString()
+      : withdrawOwnership
+    return this.createTransaction(
+      this.tcdAddress,
+      Txgen.createTransactionData(
+        'unstake(address,address,address,uint256)',
+        ['address', 'address', 'address', 'uint256'],
+        [
+          dataSource,
+          findPrevSource(this.tcdAddress, dataSource),
+          findPrevSource(this.tcdAddress, dataSource),
+          withdrawOwnershipString,
+        ],
+      ),
+    )
   }
 
   async createDistributeFeeTransaction(tokenAmount: string | BN) {
-    const { to, data } = await this.postRequestTCD('/distribute-fee', {
-      amount: BN.isBN(tokenAmount) ? tokenAmount.toString() : tokenAmount,
-    })
-    return this.createTransaction(to, data)
+    const tokenAmountString = BN.isBN(tokenAmount)
+      ? tokenAmount.toString()
+      : tokenAmount
+    return this.createTransaction(
+      this.tcdAddress,
+      Txgen.createTransactionData(
+        'distributeFee(uint256)',
+        ['uint256'],
+        [tokenAmountString],
+      ),
+    )
   }
 
-  private async postRequestTCD(path: string, data: any): Promise<any> {
-    return await InternalUtils.postRequest(
-      `/data/${this.tcdAddress}${path}`,
-      data,
-    )
+  async getTokenLock({ account, dataSource }: TokenLockQuery) {
+    if (this.web3) {
+      const mapBase = this.web3.utils
+        .toBN(
+          this.web3.utils.soliditySha3(
+            this.web3.utils.padLeft(dataSource, 64, '0') +
+              this.web3.utils.padLeft('1', 64, '0'),
+          ),
+        )
+        .add(new BN(3))
+      const newLocation = this.web3.utils.toBN(
+        this.web3.utils.soliditySha3(
+          this.web3.utils.padLeft(account, 64, '0') +
+            this.web3.utils.padLeft(
+              this.web3.utils.toHex(mapBase).slice(2),
+              64,
+              '0',
+            ),
+        ),
+      )
+      return this.web3.utils.toBN(
+        await this.web3.eth.getStorageAt(this.tcdAddress, newLocation),
+      )
+    }
   }
 }

@@ -1,17 +1,24 @@
-import BN from 'bn.js'
+// import BN from 'bn.js'
 import Web3 from 'web3'
 // import { Provider } from 'web3/providers'  TODO: bring back provider type
 import BaseClient from './BaseClient'
-import CommunityClient from './CommunityClient'
+import TokenClient from './TokenClient'
+import TCDClient from './TCDClient'
 import InternalUtils from './InternalUtils'
+import Txgen from './Txgen'
 import { Address, SendToken } from '../typing/index'
+import ParameterClient from './ParameterClient'
+import BN from 'bn.js'
 
 /**
  * This is class for get balance and transfer BandToken.
  */
 export default class BandProtocolClient extends BaseClient {
-  private constructor(web3?: Web3) {
+  private bandAddress: Address
+
+  private constructor(bandAddress: Address, web3?: Web3) {
     super(web3)
+    this.bandAddress = bandAddress
   }
 
   /**
@@ -20,12 +27,12 @@ export default class BandProtocolClient extends BaseClient {
    * @param args A provider's object.
    * @returns An instance of BandProtocolClient.
    */
-  static async make(args: { provider: any }) {
+  static make(args: { bandAddress: Address; provider: any }) {
     if (args.provider !== undefined) {
       const web3: Web3 = new Web3(args.provider)
-      return new BandProtocolClient(web3)
+      return new BandProtocolClient(args.bandAddress, web3)
     } else {
-      return new BandProtocolClient()
+      return new BandProtocolClient(args.bandAddress)
     }
   }
 
@@ -40,71 +47,36 @@ export default class BandProtocolClient extends BaseClient {
     }
   }
 
-  // async createCommunity({
-  //   name,
-  //   symbol,
-  //   bonding: { collateralEquation, liquiditySpread },
-  //   params: { expirationTime, minParticipationPct, supportRequiredPct },
-  // }: CommunityDetail) {
-  //   const { to, data } = await this.postRequestBand('/create-dapp', {
-  //     name,
-  //     symbol,
-  //     bondingCollateralEquation: collateralEquation,
-  //     bondingLiquiditySpread: liquiditySpread,
-  //     paramsExpirationTime: expirationTime,
-  //     paramsMinParticipationPct: minParticipationPct,
-  //     paramsSupportRequiredPct: supportRequiredPct,
-  //   })
-  //   const tx = await this.createTransaction(to, data)
-
-  //   return new Promise<CommunityClient>((resolve, reject) => {
-  //     tx.send().on('transactionHash', async (tx_hash: string) => {
-  //       if (!this.web3) {
-  //         reject()
-  //         return
-  //       }
-  //       while (true) {
-  //         const log = await this.web3.eth.getTransactionReceipt(tx_hash)
-  //         if (log) {
-  //           if (!log.status || !log.logs) {
-  //             reject()
-  //             return
-  //           }
-  //           const lastEvent = log.logs[log.logs.length - 1]
-  //           resolve(
-  //             new CommunityClient(
-  //               this.web3.utils.toChecksumAddress(
-  //                 '0x' + lastEvent.data.slice(26),
-  //               ),
-  //               this.web3,
-  //             ),
-  //           )
-  //           return
-  //         } else {
-  //           await delay(1000)
-  //         }
-  //       }
-  //     })
-  //   })
-  // }
+  /**
+   *
+   * @param args DatasetToken and BondingCurve address.
+   * @returns An instance of TokenClient.
+   */
+  newTokenClient(args: { tokenAddress: Address; curveAddress: Address }) {
+    return new TokenClient({
+      bandAddress: this.bandAddress,
+      tokenAddress: args.tokenAddress,
+      curveAddress: args.curveAddress,
+      web3: this.web3,
+    })
+  }
 
   /**
    *
-   * @param tokenAddress A CommunityToken's address.
-   * @returns An instance of CommunityClient.
+   * @param parameterAddress Parameter address.
+   * @returns An instance of ParameterClient.
    */
-  async at(tokenAddress: Address) {
-    const { tokenByAddress } = await InternalUtils.graphqlRequest(
-      `{
-        tokenByAddress(address:"${tokenAddress}") {
-          address
-      }
-    }`,
-    )
-    if (tokenByAddress && tokenByAddress.address === tokenAddress) {
-      return new CommunityClient(tokenAddress, this.web3)
-    }
-    return InternalUtils.throw("This dapp contract's address is invalid.")
+  newParameterClient(parameterAddress: Address) {
+    return new ParameterClient(parameterAddress, this.web3)
+  }
+
+  /**
+   *
+   * @param tcdAddress Parameter address.
+   * @returns An instance of TcdClient.
+   */
+  newTcdClient(tcdAddress: Address) {
+    return new TCDClient(tcdAddress, this.web3)
   }
 
   /***
@@ -137,16 +109,18 @@ export default class BandProtocolClient extends BaseClient {
    * @param value An amounts.
    */
   async createTransferTransaction({ to, value }: SendToken) {
+    if (!this.web3) {
+      return InternalUtils.throw('Required provider.')
+    }
     const valueString = BN.isBN(value) ? value.toString() : value
-    const { to: bandAddress, data } = await this.postRequestBand('/transfer', {
-      to: to,
-      value: valueString,
-    })
-    return this.createTransaction(bandAddress, data)
-  }
-
-  private async postRequestBand(path: string, data: any): Promise<any> {
-    return await InternalUtils.postRequest(`/band${path}`, data)
+    return this.createTransaction(
+      this.bandAddress,
+      Txgen.createTransactionData(
+        'transfer(address,uint256)',
+        ['address', 'uint256'],
+        [to, valueString],
+      ),
+    )
   }
 
   static setAPI(newAPI: string) {

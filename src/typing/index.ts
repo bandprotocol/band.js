@@ -36,6 +36,7 @@ export interface CommunityDetail {
 }
 
 export interface SendToken {
+  tokenAddress: Address
   to: Address
   value: string | BN
 }
@@ -105,4 +106,9 @@ export interface DataSourceWithStake {
 export interface WithdrawOwnership {
   dataSource: Address
   withdrawOwnership: string | BN
+}
+
+export interface TokenLockQuery {
+  account: Address
+  dataSource: Address
 }

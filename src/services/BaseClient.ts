@@ -1,9 +1,7 @@
 import Web3 from 'web3'
 import InternalUtils from './InternalUtils'
-// import BN from 'bn.js'
-import { Address } from '../typing'
+import { Address } from '../typing/index'
 import Transaction from './Transaction'
-// import { TransactionReceipt } from 'web3-core/types'
 
 /**
  * This is a BaseClient Class
