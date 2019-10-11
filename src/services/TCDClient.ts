@@ -8,6 +8,7 @@ import {
   WithdrawOwnership,
   TokenLockQuery,
 } from '../typing/index'
+import InternalUtils from './InternalUtils'
 
 const findPrevSource = ({}, {}): Address =>
   '0x0000000000000000000000000000000000000000'
@@ -92,28 +93,64 @@ export default class TCDClient extends BaseClient {
   }
 
   async getTokenLock({ account, dataSource }: TokenLockQuery) {
-    if (this.web3) {
-      const mapBase = this.web3.utils
-        .toBN(
-          this.web3.utils.soliditySha3(
-            this.web3.utils.padLeft(dataSource, 64, '0') +
-              this.web3.utils.padLeft('1', 64, '0'),
-          ),
-        )
-        .add(new BN(3))
-      const newLocation = this.web3.utils.toBN(
+    if (!this.web3) {
+      return InternalUtils.throw('Required provider.')
+    }
+    const mapBase = this.web3.utils
+      .toBN(
         this.web3.utils.soliditySha3(
-          this.web3.utils.padLeft(account, 64, '0') +
-            this.web3.utils.padLeft(
-              this.web3.utils.toHex(mapBase).slice(2),
-              64,
-              '0',
-            ),
+          this.web3.utils.padLeft(dataSource, 64, '0') +
+            this.web3.utils.padLeft('1', 64, '0'),
         ),
       )
-      return this.web3.utils.toBN(
-        await this.web3.eth.getStorageAt(this.tcdAddress, newLocation),
-      )
+      .add(new BN(3))
+    const newLocation = this.web3.utils.toBN(
+      this.web3.utils.soliditySha3(
+        this.web3.utils.padLeft(account, 64, '0') +
+          this.web3.utils.padLeft(
+            this.web3.utils.toHex(mapBase).slice(2),
+            64,
+            '0',
+          ),
+      ),
+    )
+    return this.web3.utils.toBN(
+      await this.web3.eth.getStorageAt(this.tcdAddress, newLocation),
+    )
+  }
+
+  async getStatus(dataSource: Address) {
+    if (!this.web3) {
+      return InternalUtils.throw('Required provider.')
+    }
+    // Check active provider
+    const activeLocation = this.web3.utils.toBN(
+      this.web3.utils.soliditySha3(
+        this.web3.utils.padLeft(dataSource, 64, '0') +
+          this.web3.utils.padLeft('2', 64, '0'),
+      ),
+    )
+    const activeResult = this.web3.utils.toBN(
+      await this.web3.eth.getStorageAt(this.tcdAddress, activeLocation),
+    )
+
+    if (!activeResult.eq(new BN(0))) {
+      return 'ACTIVE'
+    }
+
+    const reserveLocation = this.web3.utils.toBN(
+      this.web3.utils.soliditySha3(
+        this.web3.utils.padLeft(dataSource, 64, '0') +
+          this.web3.utils.padLeft('3', 64, '0'),
+      ),
+    )
+    const reserveResult = this.web3.utils.toBN(
+      await this.web3.eth.getStorageAt(this.tcdAddress, reserveLocation),
+    )
+    if (reserveResult.eq(new BN(0))) {
+      return 'DISABLED'
+    } else {
+      return 'RESERVED'
     }
   }
 }

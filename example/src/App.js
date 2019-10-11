@@ -48,20 +48,20 @@ window.BN = BN
 
 window.bandInit = async () => {
   window.BandProtocolClient.setGraphQlAPI(
-    'https://api.thegraph.com/subgraphs/name/taobun/bandprotocol-ropsten',
+    'https://api.thegraph.com/subgraphs/name/taobun/bandprotocol-mainnet',
   )
   window.web4 = new Web3(window.ethereum)
   window.bandClient = await BandProtocolClient.make({
     provider: window.web4.currentProvider,
-    bandAddress: '0x767c597367871521F3379B193EDB6B0af838D0d3',
+    bandAddress: '0xba11d00c5f74255f56a5e366f4f77f5a186d7f55',
   })
 
   window.communityClient = await window.bandClient.newTokenClient({
-    tokenAddress: '0xb1277DEadd4428663773EE0F42E02b0483866186',
-    curveAddress: '0x177d3Ec468a8ce1B6D98A8e5B64005c316b96100',
+    tokenAddress: '0x33d3f653c9d86dc726337cf395fab39583a35988',
+    curveAddress: '0xe5f32f9b531672889c72d2ba8be73f3a33c5c73e',
   })
   window.tcdClient = window.bandClient.newTcdClient(
-    '0xd106616684F0744859Da868b6E67f79E6f42bec8',
+    '0xd5d2b9e9bcd172d5fc8521afd2c98dd239f5b607',
   )
 }
 
