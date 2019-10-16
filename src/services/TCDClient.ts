@@ -105,14 +105,10 @@ export default class TCDClient extends BaseClient {
       )
       .add(new BN(3))
     const newLocation = this.web3.utils.toBN(
-      this.web3.utils.soliditySha3(
-        this.web3.utils.padLeft(account, 64, '0') +
-          this.web3.utils.padLeft(
-            this.web3.utils.toHex(mapBase).slice(2),
-            64,
-            '0',
-          ),
-      ),
+      this.web3.utils.soliditySha3(this.web3.utils.padLeft(account, 64, '0'), {
+        type: 'uint256',
+        value: mapBase.toString(),
+      }),
     )
     return this.web3.utils.toBN(
       await this.web3.eth.getStorageAt(this.tcdAddress, newLocation),
